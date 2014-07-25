@@ -152,3 +152,23 @@ def RNAtoPro(seq):
 		if fc+3 >= len(seq):
 			end = True
 	print(protein)
+
+def findMotif(motif, seq):
+	locations =  []
+	mod = 1
+	for index, base in enumerate(seq):
+		if base == motif[0]:
+			while mod < len(motif) and (index + mod) < len(seq):
+				if seq[index+mod] == motif[mod]:
+					print("Base match found, scanning for whole motif...")
+					mod += 1
+				else:
+					mod = 1 #NB: reset mod on fail
+					break
+			if mod >= len(motif):
+				print("Whole motif found, adding location...")
+				print(seq[index:index+mod])
+				locations.append(index+1)
+				mod = 1
+	print("Full sequence scanned, returning locations...")
+	print(locations)
