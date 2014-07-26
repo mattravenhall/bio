@@ -160,6 +160,7 @@ def findMotif(motif, seq):
 		if base == motif[0]:
 			while mod < len(motif) and (index + mod) < len(seq):
 				if seq[index+mod] == motif[mod]:
+					print("Base match found, scanning for whole motif...")
 					mod += 1
 				else:
 					mod = 1 #NB: reset mod on fail
