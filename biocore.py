@@ -16,7 +16,6 @@ def countNucs(seq):
 			T += 1
 	print(str(A) + ' ' + str(C) + ' ' + str(G) + ' '+ str(T))
 
-
 def DNAtoRNA(seq, switch = "toRNA"):
 	## Converts DNA string to RNA
 	# Add check for RNA
@@ -91,19 +90,16 @@ def getHeteroProb(k, m, n):
 		prob = (D*DD*pDD)+(D*Dx*pDH)+(D*Dx*pDR)+(H*HH*pHH)+(H*Hx*pDH)+(H*Hx*pHR)+(R*RR*pRR)+(R*Rx*pDR)+(R*Rx*pHR)
 		print(prob)
 
-def getGC(file):
-	#Given a fasta returns the strain with the highest GC content, with that value
-	#This method contains the ability to convert a fasta into a dictionary
-	#It can therefore be built upon for other fasta uses
-
-	#take name from > to /n, seq from /n to >
-	strains = {} #key = strain, value = GC
-	strainsGC = {}
+def fastaToDict(fasta):
+	#given a fasta, returns a dictionary as:
+	#strains = {"strainB": "sequenceB", "strainA": "sequenceA", "strainC": "sequenceC"}
+	#NB: dictionary entries are not ordered
+	
+	strains = {}
 	seqcatch = ""
-	f = open(file, "r")
-
-	#get GC
-	for line in f: #FASTA to Dictionary
+	f = open(fasta, "r")
+	
+	for line in f: #take name from > to /n, seq from /n to >
 		if ">" in line:
 			tmp = line[1:-1]
 			strains[tmp] = seqcatch
@@ -111,22 +107,35 @@ def getGC(file):
 		else:
 			seqcatch += line.rstrip()
 		strains[tmp] = seqcatch
-	for key in strains: #calculate GCs and assign to strains
-		GC = 0
-		for base in strains[key]:
-			if base in ("G", "C"):
-				GC += 1
-		GCperc = (GC / len(strains[key])) * 100
-		strainsGC[key] = GCperc
-	highestGC = 0
-	highestGCstrain = ""
-	for key in strainsGC: #find the highest GC, return the strain & value
-		if strainsGC[key] > highestGC:
-			highestGC = strainsGC[key]
-			highestGCstrain = key
-	print(str(highestGCstrain))
-	print(str(strainsGC[highestGCstrain]))
 	f.close()
+	return(strains)		
+
+def getGC(fasta):
+	strains = fastaToDict(fasta) #convert fasta into dictionary
+	strainsGC = {}
+		for key in strains: #calculate GCs and assign to strains
+			GC = 0
+			for base in strains[key]:
+				if base in ("G", "C"):
+					GC += 1
+			GCperc = (GC / len(strains[key])) * 100
+			strainsGC[key] = GCperc
+	return(strainsGC)
+	
+	
+def getHighestGC(fasta):
+		#Given a fasta returns the strain with the highest GC content, with that value
+		strainsGC = getGC(fasta)
+
+		#get GC
+		highestGC = 0
+		highestGCstrain = ""
+		for key in strainsGC: #find the highest GC, return the strain & value
+			if strainsGC[key] > highestGC:
+				highestGC = strainsGC[key]
+				highestGCstrain = key
+		print(str(highestGCstrain))
+		print(str(strainsGC[highestGCstrain]))
 
 def calcHamming(A, B):
 	#calculate the Hamming distance between two sequences of equal length
