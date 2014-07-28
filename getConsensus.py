@@ -3,17 +3,17 @@ def fastaToMatrix(fasta):
 	#matrix = [[seqA], [seqB], [seqC]]
 	
 	seqcatch = ""
+	location = -1
 	f = open(fasta, "r")
 	
 	for line in f: #take name from > to /n, seq from /n to >
 	#currently fastaToDict, needs to be ToMatrix
 		if ">" in line:
-			tmp = line[1:-1]
-			strains[tmp] = seqcatch
+			location += 1
 			seqcatch = ""
 		else:
 			seqcatch += line.rstrip()
-		strains[tmp] = seqcatch
+		strains[0][location] = seqcatch
 	f.close()
 	return(strains)	
 
