@@ -1,5 +1,5 @@
 def countNucs(seq):
-	## Returns number of A, C, G & T
+	"""Return the number of A, C, G & Ts within a sequence of DNA given as a string"""
 	# Add DNA/RNA check
 	A = 0
 	C = 0
@@ -16,20 +16,24 @@ def countNucs(seq):
 			T += 1
 	print(str(A) + ' ' + str(C) + ' ' + str(G) + ' '+ str(T))
 
-def DNAtoRNA(seq, switch = "toRNA"):
-	## Converts DNA string to RNA
-	# Add check for RNA
-	# Develop this into a DNA to/from RNA two-way convertor with auto-detection and optional switch
-	
+def transcribe(seq):
+	"""Converts a sequence of bases, provided as a string, from RNA to DNA or DNA to RNA. An automatic check is included to determine if the given sequence is DNA or RNA"""
 	seq.upper()
 	newSeq = ""
 
+	#DNA/RNA check
 	if "U" in seq:
 		switch = "toDNA"
 		if "T" in seq:
 			print("Invalid sequence, contains both DNA and RNA. Function aborted.")
 			return
+	if "T" in seq:
+		switch = "toRNA"
+		if "U" in seq:
+			print("Invalid sequence, contains both DNA and RNA. Function aborted.")
+			return
 	
+	#Sequence conversion
 	if switch = "toDNA":
 		for x in list(seq):
 			if x == "U":
@@ -45,8 +49,7 @@ def DNAtoRNA(seq, switch = "toRNA"):
 	print(newSeq)
 
 def getComplement(seq):
-	## Get reverse complement
-	# Reverse given string
+	"""Returns the reverse complement of a given sequence, as a string"""
 	revSeq = seq[::-1]
 	newSeq = ""
 	for x in list(revSeq):
@@ -61,9 +64,7 @@ def getComplement(seq):
 	print(newSeq)
 
 def getHeteroProb(k, m, n):
-		# Returns the probability of a dominant positive offspring
-		# in a pairing of a population where dominant (k),
-		# heterozygous (m) and recessive (n) traits are known
+		"""Returns the probability of gaining a dominate positive offspring for a pairing within a population where dominant (k), heterozygous (m) and recessive (n) traits are known"""
 
 		# Probability of parent X being D, H or R
 		D = k/(k+m+n)
@@ -91,10 +92,7 @@ def getHeteroProb(k, m, n):
 		print(prob)
 
 def fastaToDict(fasta):
-	#given a fasta, returns a dictionary as:
-	#strains = {"strainB": "sequenceB", "strainA": "sequenceA", "strainC": "sequenceC"}
-	#NB: dictionary entries are not ordered
-	
+	"""Given a fasta as its harddrive location, returns a dictionary where keys are the strain name and values are their associated sequences. Note that dictionaries are unordered!"""
 	strains = {}
 	seqcatch = ""
 	f = open(fasta, "r")
@@ -111,6 +109,7 @@ def fastaToDict(fasta):
 	return(strains)		
 
 def getGC(fasta):
+	"""Given the location of a fasta, returns the GC value for each strain as a dictionary"""
 	strains = fastaToDict(fasta) #convert fasta into dictionary
 	strainsGC = {}
 		for key in strains: #calculate GCs and assign to strains
@@ -124,29 +123,31 @@ def getGC(fasta):
 	
 	
 def getHighestGC(fasta):
-		#Given a fasta returns the strain with the highest GC content, with that value
-		strainsGC = getGC(fasta)
-
-		#get GC
-		highestGC = 0
-		highestGCstrain = ""
-		for key in strainsGC: #find the highest GC, return the strain & value
-			if strainsGC[key] > highestGC:
-				highestGC = strainsGC[key]
-				highestGCstrain = key
-		print(str(highestGCstrain))
-		print(str(strainsGC[highestGCstrain]))
+	"""Given a fasta file location, prints the strain with the highest GC content and its value"""
+	strainsGC = getGC(fasta) #get GCs
+	highestGC = 0
+	highestGCstrain = ""
+	for key in strainsGC: #find the highest GC, return the strain & value
+		if strainsGC[key] > highestGC:
+			highestGC = strainsGC[key]
+			highestGCstrain = key
+	print(str(highestGCstrain))
+	print(str(strainsGC[highestGCstrain]))
 
 def calcHamming(A, B):
-	#calculate the Hamming distance between two sequences of equal length
+	"""Calculate the Hamming distance between two sequences (as strings) of equal length"""
 	dH = 0
 	if len(A) == len(B):
 		for index, value in enumerate(A):
 			if value != B[index]:
 				dH += 1
+	if len(A) != len(B):
+		print("Error: Sequences must be the same length!")
+		return
 	print(dH)
 
 def RNAtoPro(seq):
+	"""Given an RNA sequence, as a string, returns the protein sequence"""
 	##Convert RNA to Protein
 	#Could include a "check type" function to check if DNA/RNA/Protein
 	protein = ""
@@ -163,6 +164,7 @@ def RNAtoPro(seq):
 	print(protein)
 
 def findMotif(motif, seq):
+	"""Searches for a given motif within a sequence, returning the locations of each find as an integer"""
 	locations =  []
 	mod = 1
 	for index, base in enumerate(seq):
