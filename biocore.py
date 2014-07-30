@@ -183,3 +183,50 @@ def findMotif(motif, seq):
 				mod = 1
 	print("Full sequence scanned, returning locations...")
 	print(locations)
+
+def findConsensus(fasta):
+        """Returns the consensus string and profile matrix for a given set of strains.
+Strains must be provided as a fasta. NB: Errors will occur when there is a base conflict."""
+        base = ['A', 'C', 'G', 'T']
+        baseDict = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
+        count = 0
+        consensus = ""
+
+        #pull sequences into a dictionary {strain: sequence}
+        sequences = fastaToDict(fasta)
+
+        #check sequences are the same length, else abort
+        #if check passes, assigns that length to seqLength
+        seqLen = []
+        for value in sequences.values():
+                seqLen.append(len(value))
+        if max(seqLen) != min(seqLen): #exit if sequences different lengths
+                print("Error: Sequences must be of the same length!")
+                print("Sequences current range from " + str(min(seqLen)) + " to " + str(max(seqLen)) + " bases long.")
+                return
+        else: #set sequence lengths
+                seqLength = max(seqLen)
+                
+        #create empty matrix
+        profile = [[0]*seqLength for i in range(4)]
+
+        #populate matrix
+        for value in sequences.values():
+                for basePos, baseType in enumerate(value):
+                       profile[baseDict[baseType]][basePos] += 1
+                       #NB: base position = y, base type = x
+        
+        for i in range(seqLength):
+                colHolder = []
+                for value, x in enumerate(profile):
+                        colHolder.append(profile[value][i])
+                consensus += (base[colHolder.index(max(colHolder))])
+
+        #print consensus string
+        print(consensus)
+                
+        #print profile matrix
+        for x in profile:
+                row = ' '.join(map(str, x))
+                print(base[count] + ": " + row)
+                count += 1
