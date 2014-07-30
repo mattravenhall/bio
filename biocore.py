@@ -34,13 +34,13 @@ def transcribe(seq):
 			return
 	
 	#Sequence conversion
-	if switch = "toDNA":
+	if switch == "toDNA":
 		for x in list(seq):
 			if x == "U":
 				newSeq += "T"
 			else:
 				newSeq += str(x)
-	elif switch = "toRNA":
+	elif switch == "toRNA":
 		for x in list(seq):
 			if x == "T":
 				newSeq += "U"
@@ -112,13 +112,13 @@ def getGC(fasta):
 	"""Given the location of a fasta, returns the GC value for each strain as a dictionary"""
 	strains = fastaToDict(fasta) #convert fasta into dictionary
 	strainsGC = {}
-		for key in strains: #calculate GCs and assign to strains
-			GC = 0
-			for base in strains[key]:
-				if base in ("G", "C"):
-					GC += 1
-			GCperc = (GC / len(strains[key])) * 100
-			strainsGC[key] = GCperc
+	for key in strains: #calculate GCs and assign to strains
+		GC = 0
+		for base in strains[key]:
+			if base in ("G", "C"):
+				GC += 1
+		GCperc = (GC / len(strains[key])) * 100
+		strainsGC[key] = GCperc
 	return(strainsGC)
 	
 	

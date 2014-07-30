@@ -1,44 +1,76 @@
-def fastaToMatrix(fasta):
-	#given a fasta, returns a matrix as:
-	#matrix = [[seqA], [seqB], [seqC]]
-	
-	strains = []
-	strains.append([])
-	location = -1
+def fastaToDict(fasta):
+	"""Given a fasta as its harddrive location, returns a dictionary where keys are the strain name and values are their associated sequences. Note that dictionaries are unordered!"""
+	strains = {}
+	seqcatch = ""
 	f = open(fasta, "r")
-
-        #create empty matrix
-
-	#populate matrix
+	
 	for line in f: #take name from > to /n, seq from /n to >
-	#currently fastaToDict, needs to be ToMatrix
 		if ">" in line:
-			location += 1
-			#add matrix position here? strains[0][location]
+			tmp = line[1:-1]
+			strains[tmp] = seqcatch
+			seqcatch = ""
 		else:
-                        #add seq to the previously created position
-			strains[location].append(line.rstrip())
-		
+			seqcatch += line.rstrip()
+		strains[tmp] = seqcatch
 	f.close()
 	return(strains)
 
-        #alt: capture each sequence in a list, then create matrix from that list
-
 def findConsensus(fasta):
+        
 	base = ['A', 'C', 'G', 'T']
+	baseDict = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
 	count = 0
+	consensus = ""
 
-	matrix = fastaToMatrix(fasta)
+        #pull sequences into a dictionary {strain: sequence}
+        sequences = fastaToDict(fasta)
 
-	#TEST: print matrix
-        #for row in matrix:
-                #print(' '.join(row))
+        #check sequences are the same length, else abort
+        #if check passes, assigns that length to seqLength
+        seqLen = []
+        for value in sequences.values():
+                seqLen.append(len(value))
+        if max(seqLen) != min(seqLen): #exit if sequences different lengths
+                print("Error: Sequences must be of the same length!")
+                print("Sequences current range from " + str(min(seqLen)) + " to " + str(max(seqLen)) + " bases long.")
+                return
+        else: #set sequence lengths
+                seqLength = max(seqLen)
+                
+        #create empty matrix
+        profile = [[0]*seqLength for i in range(4)]
 
-	#make profile matrix from matrix
+        #populate matrix
+        for value in sequences.values():
+                for basePos, baseType in value:
+                       profile[baseDict[baseType]][basePos] += 1
+                       #NB: base position = y, base type = x
+
+        ##############       
 	#make consensus string from profile matrix
+        #get max of each column, convert into associated base
+        #consensus =
+        #use this to iterate over columns within the profile matrix
+        #for x in range(len(base)):
+        #       print(profile[x][0]) #grabs all first bases of a seq, use [y] to go through a sequence
+        #       grab the x for the highest value (0:A, 1:C, 2:G, 3:T)
 
+        #grab a column
+        #for value, x in enumerate(profile):
+        #       profile[value][COLUMN])
+        ##############
+        
+        for i in range(seqLength):
+               colHolder = []
+               for value, x in enumerate(profile):
+	               colHolder.append(profile[value][i])
+	       consensus.append(base[colHolder.index(max(colHolder))])
+
+        #print consensus string
 	print(consensus)
-	for x, y in profile:
-		print(base[count], x, y)
+                
+        #print profile matrix
+	for x in profile:
+		row = ' '.join(map(str, x))
+		print(base[count] + row)
 		count += 1
-
