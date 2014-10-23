@@ -230,3 +230,26 @@ Strains must be provided as a fasta. NB: Errors will occur when there is a base 
                 row = ' '.join(map(str, x))
                 print(base[count] + ": " + row)
                 count += 1
+
+def getMeanLength(filename):
+	"""Given a fasta, return the length of each contig followed by the mean length."""
+
+	contigLengths = [0]
+	x = -1
+
+	f = open(filename, "r")
+
+	for line in f:
+		if ">" in line:
+			# Create new entry in contigLengths ()
+			contigLengths.append(0)
+			x += 1
+		else:
+			# Add length of line to value for that contig
+			contigLengths[x] += len(line.rstrip('\n'))
+
+	contigLengths = contigLengths[:-1] # Removes excess list entry
+	totalMean = sum(contigLengths) / len(contigLengths)
+
+	print ("Contig lengths: " + str(contigLengths))
+	return ("Mean contig length: " + str(totalMean))
