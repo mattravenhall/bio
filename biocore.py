@@ -1,3 +1,51 @@
+####################################
+# Utilities of broader application #
+####################################
+
+def namesToFile(fasta, keepStart='N'):
+	"""Creates a file of names from a given fasta"""
+	titles = []
+
+	f = open(fasta, "r")
+
+	for line in f:
+		if ">" in line:
+			if (keepStart.upper() == 'N'):
+				titles.append(line.lstrip('>'))
+			elif (keepStart.upper() == 'Y'):
+				titles.append(line)
+			else:
+				print("keepStart input unclear, accepts Y/N only")
+				return
+	f.close()
+
+	n = open(r'names_out.txt', 'w')
+
+	for element in titles:
+		n.write(element)
+	n.close()
+
+def fastaToDict(fasta):
+	"""Given a fasta as its harddrive location, returns a dictionary where keys are the strain name and values are their associated sequences. Note that dictionaries are unordered!"""
+	strains = {}
+	seqcatch = ""
+	f = open(fasta, "r")
+	
+	for line in f: #take name from > to /n, seq from /n to >
+		if ">" in line:
+			tmp = line[1:-1]
+			strains[tmp] = seqcatch
+			seqcatch = ""
+		else:
+			seqcatch += line.rstrip()
+		strains[tmp] = seqcatch
+	f.close()
+	return(strains)
+
+#########################
+# Biologically Relevant #
+#########################
+
 def countNucs(seq):
 	"""Return the number of A, C, G & Ts within a sequence of DNA given as a string"""
 	# Add DNA/RNA check
@@ -89,24 +137,7 @@ def getHeteroProb(k, m, n):
 
 		# Full calculation
 		prob = (D*DD*pDD)+(D*Dx*pDH)+(D*Dx*pDR)+(H*HH*pHH)+(H*Hx*pDH)+(H*Hx*pHR)+(R*RR*pRR)+(R*Rx*pDR)+(R*Rx*pHR)
-		print(prob)
-
-def fastaToDict(fasta):
-	"""Given a fasta as its harddrive location, returns a dictionary where keys are the strain name and values are their associated sequences. Note that dictionaries are unordered!"""
-	strains = {}
-	seqcatch = ""
-	f = open(fasta, "r")
-	
-	for line in f: #take name from > to /n, seq from /n to >
-		if ">" in line:
-			tmp = line[1:-1]
-			strains[tmp] = seqcatch
-			seqcatch = ""
-		else:
-			seqcatch += line.rstrip()
-		strains[tmp] = seqcatch
-	f.close()
-	return(strains)		
+		print(prob)		
 
 def getGC(fasta):
 	"""Given the location of a fasta, returns the GC value for each strain as a dictionary"""
