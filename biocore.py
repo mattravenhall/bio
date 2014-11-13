@@ -49,10 +49,7 @@ def fastaToDict(fasta):
 def countNucs(seq):
 	"""Return the number of A, C, G & Ts within a sequence of DNA given as a string"""
 	# Add DNA/RNA check
-	A = 0
-	C = 0
-	G = 0
-	T = 0
+	A = C = G = T = 0
 	for x in list(seq):
 		if x == "a" or "A":
 			A += 1
