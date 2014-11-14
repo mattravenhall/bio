@@ -26,9 +26,9 @@ def namesToFile(fasta, keepStart='N'):
     n.close()
 
 def fastaToDict(fasta):
-    """Given a fasta as its harddrive location, returns a dictionary where
-    keys are the strain name and values are their associated sequences.
-    Note that dictionaries are unordered!
+    """Given a fasta as its harddrive location, returns a dictionary
+    where keys are the strain name and values are their associated
+    sequences. Note that dictionaries are unordered!
     """
     strains = {}
     seqcatch = ""
@@ -50,8 +50,8 @@ def fastaToDict(fasta):
 #########################
 
 def countNucs(seq):
-    """Return the number of A, C, G & Ts within a sequence of DNA given as a
-    string
+    """Return the number of A, C, G & Ts within a sequence of DNA given
+    as a string.
     """
     # Add DNA/RNA check
     A = C = G = T = 0
@@ -67,9 +67,9 @@ def countNucs(seq):
     print(str(A) + ' ' + str(C) + ' ' + str(G) + ' '+ str(T))
 
 def transcribe(seq):
-    """Converts a sequence of bases, provided as a string, from RNA to DNA or
-    DNA to RNA. An automatic check is included to determine if the given
-    sequence is DNA or RNA
+    """Converts a sequence of bases, provided as a string, from RNA to
+    DNA or DNA to RNA. An automatic check is included to determine if
+    the given sequence is DNA or RNA.
     """
     seq.upper()
     newSeq = ""
@@ -104,7 +104,9 @@ def transcribe(seq):
     print(newSeq)
 
 def getComplement(seq):
-    """Returns the reverse complement of a given sequence, as a string"""
+    """Returns the reverse complement of a given sequence,
+    as a string
+    """
     revSeq = seq[::-1]
     newSeq = ""
     for x in list(revSeq):
@@ -119,9 +121,9 @@ def getComplement(seq):
     print(newSeq)
 
 def getHeteroProb(k, m, n):
-        """Returns the probability of gaining a dominate positive offspring
-        for a pairing within a population where dominant (k), heterozygous (m)
-        and recessive (n) traits are known
+        """Returns the probability of gaining a dominate positive
+        offspring for a pairing within a population where dominant (k),
+        heterozygous (m) and recessive (n) traits are known
         """
 
         # Probability of parent X being D, H or R
@@ -150,8 +152,8 @@ def getHeteroProb(k, m, n):
         print(prob)        
 
 def getGC(fasta):
-    """Given the location of a fasta, returns the GC value for each strain as
-    a dictionary
+    """Given the location of a fasta, returns the GC value for each
+    strain as a dictionary.
     """
     strains = fastaToDict(fasta) #convert fasta into dictionary
     strainsGC = {}
@@ -166,8 +168,8 @@ def getGC(fasta):
     
     
 def getHighestGC(fasta):
-    """Given a fasta file location, prints the strain with the highest GC
-    content and its value.
+    """Given a fasta file location, prints the strain with the highest
+    GC content and its value.
     """
     strainsGC = getGC(fasta) #get GCs
     highestGC = 0
@@ -180,8 +182,8 @@ def getHighestGC(fasta):
     print(str(strainsGC[highestGCstrain]))
 
 def calcHamming(A, B):
-    """Calculate the Hamming distance between two sequences (as strings) of
-    equal length.
+    """Calculate the Hamming distance between two sequences (as strings)
+    of equal length.
     """
     dH = 0
     if len(A) == len(B):
@@ -194,7 +196,9 @@ def calcHamming(A, B):
     print(dH)
 
 def RNAtoPro(seq):
-    """Given an RNA sequence, as a string, returns the protein sequence"""
+    """Given an RNA sequence, as a string, returns the protein
+    sequence.
+    """
     ##Convert RNA to Protein
     #Could include a "check type" function to check if DNA/RNA/Protein
     protein = ""
@@ -274,8 +278,8 @@ def RNAtoPro(seq):
     print(protein)
 
 def findMotif(motif, seq):
-    """Searches for a given motif within a sequence, returning the locations
-    of each find as an integer.
+    """Searches for a given motif within a sequence, returning the
+    locations of each find as an integer.
     """
     locations =  []
     mod = 1
@@ -297,10 +301,10 @@ def findMotif(motif, seq):
     print(locations)
 
 def findConsensus(fasta):
-        """Returns the consensus string and profile matrix for a given set of
-        strains.
-        Strains must be provided as a fasta. NB: Errors will occur when there
-        is a base conflict.
+        """Returns the consensus string and profile matrix for a given
+        set of strains.
+        Strains must be provided as a fasta. NB: Errors will occur when
+        there is a base conflict.
         """
         base = ['A', 'C', 'G', 'T']
         baseDict = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
@@ -317,7 +321,8 @@ def findConsensus(fasta):
                 seqLen.append(len(value))
         if max(seqLen) != min(seqLen): #exit if sequences different lengths
                 print("Error: Sequences must be of the same length!")
-                print("Sequences current range from " + str(min(seqLen)) + " to " + str(max(seqLen)) + " bases long.")
+                print("Sequences current range from " + str(min(seqLen)) +\
+                      " to " + str(max(seqLen)) + " bases long.")
                 return
         else: #set sequence lengths
                 seqLength = max(seqLen)
@@ -347,8 +352,8 @@ def findConsensus(fasta):
                 count += 1
 
 def getMeanLength(filename):
-    """Given a fasta, return the length of each contig followed by the mean
-    length.
+    """Given a fasta, return the length of each contig followed by the
+    mean length.
     """
 
     contigLengths = [0]
