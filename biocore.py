@@ -304,13 +304,18 @@ def findConsensus(fasta):
                 print(base[count] + ": " + row)
                 count += 1
 
-def getMeanLength(filename):
-    """Given a fasta, return the length of each contig followed by the
-    mean length.
+def getFastaStats(filename, returnFull='N'):
+    """Given a fasta, return the top, bottom and mean lengths.
+    Can also optionally return the full list of sequence lengths.
     """
 
+    # NB: Replacing with a 'FASTA' class might be the best future solution
+
+    if returnFull.upper() not in ['Y', 'N']:
+        return ("Invalid value entered for returnFull, function only accepts Y or N.")
+
     contigLengths = [0]
-    x = -1
+    x = -1 # This can probably be replaced with something better suited
 
     f = open(filename, "r")
 
@@ -326,5 +331,11 @@ def getMeanLength(filename):
     contigLengths = contigLengths[:-1] # Removes excess list entry
     totalMean = sum(contigLengths) / len(contigLengths)
 
-    print ("Contig lengths: " + str(contigLengths))
-    return ("Mean contig length: " + str(totalMean))
+    if returnFull.upper() == 'Y':
+        print ("Contig lengths: " + str(contigLengths))
+
+    print ("Mean contig length: " + str(totalMean))
+    print ("Longest sequence: " + str(max(contigLengths)))
+    print ("Shortest sequence: " + str(min(contigLengths)))
+    print ("Total sequences: " + str(len(contigLengths)))
+    # Room for median, mode etc.
