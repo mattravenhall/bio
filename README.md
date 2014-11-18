@@ -6,3 +6,6 @@ All completed functions are located here. This file should be considered the mos
 
 ####Additional .py files
 Active function development takes place in files additional to biocore.py. Any functions found outside of biocore.py should be considered as under development and may not accurately return their intended results.
+
+####Acknowledgements
+Thanks to Álvaro Abella Bascarán for his proposed style changes.
