@@ -90,7 +90,7 @@ def getStats(filename, returnLens=False):
 
     print ("Mean: " + str(totalMean))
     print ("N50: " + str(N50))
-    print ("GC: " + str(statsGC))
+    print ("GC: " + str(statsGC) + "%")
     print ("Longest: " + str(max(contigLengths)))
     print ("Shortest: " + str(min(contigLengths)))
     print ("No. Contigs: " + str(len(contigLengths)))
