@@ -29,7 +29,7 @@ def namesToFile(fasta, keepStart='N'):
 def fastaToDict(fasta):
     """Given a fasta as its harddrive location, returns a dictionary
     where keys are the strain name and values are their associated
-    sequences. Note that dictionaries are unordered!
+    sequences. Note that dictionaries are unordered.
     """
     strains = {}
     seqcatch = ""
@@ -45,6 +45,55 @@ def fastaToDict(fasta):
         strains[tmp] = seqcatch
     f.close()
     return(strains)
+
+def getStats(filename, returnLens='N'):
+    """Given a fasta, return the top, bottom and mean lengths.
+    Can also optionally return the full list of sequence lengths.
+    """
+
+    # NB: Replacing with a 'FASTA' class might be the best future solution
+
+    if returnLens.upper() not in ['Y', 'N']:
+        return ("Invalid value entered for returnFull, function only accepts Y or N.")
+
+    contigLengths = [0]
+    x = -1 # This can probably be replaced with something better suited
+
+    f = open(filename, "r")
+
+    # Get list of sequence lengths
+    for line in f:
+        if ">" in line:
+            # Create new entry in contigLengths ()
+            contigLengths.append(0)
+            x += 1
+        else:
+            # Add length of line to value for that contig
+            contigLengths[x] += len(line.rstrip('\n'))
+
+    contigLengths = contigLengths[:-1] # Removes excess list entry
+    totalMean = sum(contigLengths) / len(contigLengths)
+
+    # Calculate N50 (The smallest contig length that at least half the nucleotides belong to)
+    contigLengths.sort(reverse=True)
+    print (contigLengths)
+    tmpTotal = 0
+
+    for index, value in enumerate(contigLengths):
+        tmpTotal += int(contigLengths[index])
+        if tmpTotal > (sum(contigLengths) / 2):
+            N50 = contigLengths[index]
+            break
+
+    if returnLens.upper() == 'Y':
+        print ("Contig lengths: " + str(contigLengths))
+
+    print ("Mean: " + str(totalMean))
+    print ("N50: " + str(N50))
+    print ("Top: " + str(max(contigLengths)))
+    print ("Bottom: " + str(min(contigLengths)))
+    print ("Contigs: " + str(len(contigLengths)))
+    # Could also add mode, median etc.
 
 #########################
 # Biologically Relevant #
@@ -303,39 +352,3 @@ def findConsensus(fasta):
                 row = ' '.join(map(str, x))
                 print(base[count] + ": " + row)
                 count += 1
-
-def getFastaStats(filename, returnFull='N'):
-    """Given a fasta, return the top, bottom and mean lengths.
-    Can also optionally return the full list of sequence lengths.
-    """
-
-    # NB: Replacing with a 'FASTA' class might be the best future solution
-
-    if returnFull.upper() not in ['Y', 'N']:
-        return ("Invalid value entered for returnFull, function only accepts Y or N.")
-
-    contigLengths = [0]
-    x = -1 # This can probably be replaced with something better suited
-
-    f = open(filename, "r")
-
-    for line in f:
-        if ">" in line:
-            # Create new entry in contigLengths ()
-            contigLengths.append(0)
-            x += 1
-        else:
-            # Add length of line to value for that contig
-            contigLengths[x] += len(line.rstrip('\n'))
-
-    contigLengths = contigLengths[:-1] # Removes excess list entry
-    totalMean = sum(contigLengths) / len(contigLengths)
-
-    if returnFull.upper() == 'Y':
-        print ("Contig lengths: " + str(contigLengths))
-
-    print ("Mean contig length: " + str(totalMean))
-    print ("Longest sequence: " + str(max(contigLengths)))
-    print ("Shortest sequence: " + str(min(contigLengths)))
-    print ("Total sequences: " + str(len(contigLengths)))
-    # Room for median, mode etc.
