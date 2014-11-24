@@ -76,7 +76,6 @@ def getStats(filename, returnLens='N'):
 
     # Calculate N50 (The smallest contig length that at least half the nucleotides belong to)
     contigLengths.sort(reverse=True)
-    print (contigLengths)
     tmpTotal = 0
 
     for index, value in enumerate(contigLengths):
