@@ -46,15 +46,12 @@ def fastaToDict(fasta):
     f.close()
     return(strains)
 
-def getStats(filename, returnLens='N'):
+def getStats(filename, returnLens=False):
     """Given a fasta, return the top, bottom and mean lengths.
     Can also optionally return the full list of sequence lengths.
     """
 
     # NB: Replacing with a 'FASTA' class might be the best future solution
-
-    if returnLens.upper() not in ['Y', 'N']:
-        return ("Invalid value entered for returnFull, function only accepts Y or N.")
 
     contigLengths = [0]
     x = -1 # This can probably be replaced with something better suited
@@ -84,14 +81,20 @@ def getStats(filename, returnLens='N'):
             N50 = contigLengths[index]
             break
 
-    if returnLens.upper() == 'Y':
+    # Calculate GC
+    statsGC = getGC(filename, total=True)
+
+    # Optional: Return full list of contig lengths
+    if returnLens:
         print ("Contig lengths: " + str(contigLengths))
 
     print ("Mean: " + str(totalMean))
     print ("N50: " + str(N50))
-    print ("Top: " + str(max(contigLengths)))
-    print ("Bottom: " + str(min(contigLengths)))
-    print ("Contigs: " + str(len(contigLengths)))
+    print ("GC: " + str(statsGC))
+    print ("Longest: " + str(max(contigLengths)))
+    print ("Shortest: " + str(min(contigLengths)))
+    print ("No. Contigs: " + str(len(contigLengths)))
+    print ("Total length: " + str(sum(contigLengths)))
     # Could also add mode, median etc.
 
 #########################
@@ -200,30 +203,45 @@ def getHeteroProb(k, m, n):
         prob = (D*DD*pDD)+(D*Dx*pDH)+(D*Dx*pDR)+(H*HH*pHH)+(H*Hx*pDH)+(H*Hx*pHR)+(R*RR*pRR)+(R*Rx*pDR)+(R*Rx*pHR)
         print(prob)        
 
-def getGC(fasta):
+def getGC(fasta, total=False):
     """Given the location of a fasta, returns the GC value for each
-    strain as a dictionary.
+    strain as a dictionary by default. Alternatively, the total GC will
+    be returned if total=True.
     """
-    strains = fastaToDict(fasta) #convert fasta into dictionary
-    strainsGC = {}
-    for key in strains: #calculate GCs and assign to strains
-        GC = 0
-        for base in strains[key]:
-            if base in ("G", "C"):
-                GC += 1
-        GCperc = (GC / len(strains[key])) * 100
-        strainsGC[key] = GCperc
-    return(strainsGC)
-    
+    GC = 0
+    if (total == False): # Default: return dict of strains with GCs
+        strains = fastaToDict(fasta) # Convert fasta into dictionary
+        strainsGC = {}
+        for key in strains: # Calculate GCs and assign to strains
+            for base in strains[key]: # Workhorse
+                if base.upper() in ("G", "C"):
+                    GC += 1
+            GCperc = (GC / len(strains[key])) * 100
+            strainsGC[key] = GCperc
+        return(strainsGC)
+
+    elif (total): # Alternative: return the total GC for all sequences
+        totalLength = 0
+        f = open(fasta, "r")
+        for line in f: # Iterate over sequences, ignore sequences names
+            if ">" not in line:
+                totalLength += len(line.rstrip('\n'))
+                for base in line:
+                    if base.upper() in ("G", "C"):
+                        GC += 1
+        totalGC = (float(GC) / float(totalLength)) * 100
+        f.close()
+        return(round(totalGC, 2))
+        
     
 def getHighestGC(fasta):
     """Given a fasta file location, prints the strain with the highest
     GC content and its value.
     """
-    strainsGC = getGC(fasta) #get GCs
+    strainsGC = getGC(fasta) # Get GCs
     highestGC = 0
     highestGCstrain = ""
-    for key in strainsGC: #find the highest GC, return the strain & value
+    for key in strainsGC: # Find the highest GC, return the strain & value
         if strainsGC[key] > highestGC:
             highestGC = strainsGC[key]
             highestGCstrain = key
