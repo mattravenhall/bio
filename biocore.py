@@ -296,17 +296,20 @@ def RNAtoPro(seq):
             end = True
     print(protein)
 
-def findMotif(motif, seq):
+def findMotif(motif, seq, retreq=False): 
+    # TODO: Combine direct sequence input and fasta input together with automatic input detection
+    # TODO: Optionally supress print output, perhaps behind a debug=False flag
     """Searches for a given motif within a sequence, returning the
     locations of each find as an integer.
     """
+
     locations =  []
     mod = 1
     for index, base in enumerate(seq):
         if base == motif[0]:
             while mod < len(motif) and (index + mod) < len(seq):
                 if seq[index+mod] == motif[mod]:
-                    print("Base match found, scanning for whole motif...")
+                    #print("Base match found, scanning for whole motif...")
                     mod += 1
                 else:
                     mod = 1 #NB: reset mod on fail
@@ -316,8 +319,22 @@ def findMotif(motif, seq):
                 print(seq[index:index+mod])
                 locations.append(index+1)
                 mod = 1
-    print("Full sequence scanned, returning locations...")
-    print(locations)
+    #print("Full sequence scanned, returning locations...")
+    if retreq:
+        return(locations)
+    else:
+        print(locations)
+
+def findMotifFile(motif, file):
+    allSeqs = fastaToDict(file) # convert fasta to dictionary
+    fullHits = {}
+
+    for key in allSeqs:
+        print("Searching " + str(key))
+        hits = findMotif(motif, allSeqs[key], retreq=True) # return list of hits for that contig/strain
+        if hits != []:
+            fullHits[key] = hits
+    print(fullHits) # Returns a dictionary of hits according to each strain/contig
 
 def findConsensus(fasta):
         """Returns the consensus string and profile matrix for a given
