@@ -296,7 +296,7 @@ def RNAtoPro(seq):
             end = True
     print(protein)
 
-def findMotif(motif, seq): 
+def findMotif(motif, seq, vocal=False): 
     # TODO: Optionally supress print output, perhaps behind a debug=False flag
     """When given a motif <string> and a fasta <file location> or 
     sequence <string> returns the locations of that motif as a 
@@ -312,7 +312,8 @@ def findMotif(motif, seq):
         locationsDict = {}
 
         for key in allSeqs: # Iterate over each sequence
-            print("Searching" + str(key) + "...")
+            if (vocal):
+                print("Searching " + str(key) + "...")
             # Force seq into uppercase to avoid case issues
             seq = allSeqs[key].upper()
 
@@ -328,7 +329,8 @@ def findMotif(motif, seq):
                             mod = 1 # Vital reset of mod on fail
                             break
                     if mod >= len(motif):
-                        print("Whole motif found, adding location...")
+                        if (vocal):
+                            print("Whole motif found, adding location...")
                         locations.append(index+1)
                         mod = 1
             if locations != []: # Only add to hits to locations if not empty
@@ -358,6 +360,17 @@ def findMotif(motif, seq):
         # If not a file or string, abort with an error.
         # Not that os.path.isfile will probably raise an error before this pops.
         raise TypeError("Inappropriate datatype supplied, findMotif currently only accepts strings and fastas.")    
+
+def countRepeats(motifs, ref):
+    """Print the number of times a motif repeats within a larger 
+    sequence. Will work when given a string or a list of strings.
+    """
+    if (type(motifs) == str): # convert a single string into a one element list
+        motifs = [motifs]
+    for motif in motifs:
+        motifDict = findMotif(motif, ref)
+        count = sum(len(i) for i in motifDict.itervalues())
+        print(motif + ": " + str(count))  
 
 def findConsensus(fasta):
         """Returns the consensus string and profile matrix for a given
