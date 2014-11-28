@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ####################################
 # Utilities of broader application #
 ####################################
@@ -29,7 +31,8 @@ def namesToFile(fasta, keepStart='N'):
 def fastaToDict(fasta):
     """Given a fasta as its harddrive location, returns a dictionary
     where keys are the strain name and values are their associated
-    sequences. Note that dictionaries are unordered.
+    sequences. Note that dictionaries are unordered and that all
+    bases will be forced to uppercase.
     """
     strains = {}
     seqcatch = ""
@@ -38,11 +41,11 @@ def fastaToDict(fasta):
     for line in f: #take name from > to /n, seq from /n to >
         if ">" in line:
             tmp = line[1:-1]
-            strains[tmp] = seqcatch
+            strains[tmp] = seqcatch.upper()
             seqcatch = ""
         else:
             seqcatch += line.rstrip()
-        strains[tmp] = seqcatch
+        strains[tmp] = seqcatch.upper()
     f.close()
     return(strains)
 
@@ -422,3 +425,21 @@ def findConsensus(fasta):
                 row = ' '.join(map(str, x))
                 print(base[count] + ": " + row)
                 count += 1
+
+def findKmers(length, reference):
+    """Given a kmer length and a genome as a fasta, returns a dictionary
+    of kmers and their counts.
+    """
+    refDict = fastaToDict(reference)
+    candidates = {} # sequence:count
+
+    for key in refDict:
+        for i, base in enumerate(refDict[key]): # Focus on the seq for each contig
+            if i > len(refDict[key])-length: # Can this be encorporated into the for loop statement?
+                break;
+            window = refDict[key][i:i + length] # Move across sequence with window
+            if window not in candidates:
+                candidates[window] = 1
+            elif window in candidates:
+                candidates[window] += 1
+    return candidates
