@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import sys
+import os
 
 ####################################
 # Utilities of broader application #
@@ -309,7 +312,6 @@ def findMotif(motif, seq, vocal=False):
     motif = motif.upper()
 
     # Check is seq is a file or a sequence:
-    import os
     if (os.path.isfile(seq)): # if seq is a file
         allSeqs = fastaToDict(seq) # convert fasta to dictionary
         locationsDict = {}
@@ -435,11 +437,45 @@ def findKmers(length, reference):
 
     for key in refDict:
         for i, base in enumerate(refDict[key]): # Focus on the seq for each contig
-            if i > len(refDict[key])-length: # Can this be encorporated into the for loop statement?
+            if i > len(refDict[key])-int(length): # Can this be encorporated into the for loop statement?
                 break;
-            window = refDict[key][i:i + length] # Move across sequence with window
+            window = refDict[key][i:i + int(length)] # Move across sequence with window
             if window not in candidates:
                 candidates[window] = 1
             elif window in candidates:
                 candidates[window] += 1
     return candidates
+
+def predictMT(seq):
+    """Given a sequence as a string, returns a rough prediction of its 
+    melting temperature as an int. Note that an empirically determined 
+    melting temperature may be significantly different.
+    """
+    GC = AT = 0
+
+    # determine GC & AT content of given sequence
+    for base in seq.upper():
+        if base in ("G", "C"):
+            GC += 1
+    AT = len(seq) - GC
+
+    # predict melting temperature, differs with seq length
+    if len(seq) < 14:
+        mt = 4 * GC + 2 * AT
+    else:
+        mt = 64.9 + 41 * (GC - 16.4)/len(seq)
+    return(mt)
+
+#################################################
+# For distinguishing execution/module behaviour #
+#################################################
+
+# Gateway function
+def main():
+    # First sys.argv = subfunction to be called, following arguments are that functions input arguments.
+    # if 'predictMT', call predictMT with arguments etc. etc.
+    pass
+
+# If being directly executed (ie. not imported)
+if __name__ == "__main__":
+    exit(main(sys.argv[1:])) # Call main() with arguments from the command line
