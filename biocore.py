@@ -52,7 +52,7 @@ def fastaToDict(fasta):
     f.close()
     return(strains)
 
-def getStats(filename, returnLens=False):
+def getStats(filename, returnLens=False, scaffold=False):
     """Given a fasta, return the top, bottom and mean lengths.
     Can also optionally return the full list of sequence lengths.
     """
@@ -111,18 +111,41 @@ def countNucs(seq):
     """Return the number of A, C, G & Ts within a sequence of DNA given
     as a string.
     """
-    # Add DNA/RNA check
-    A = C = G = T = 0
+    # DNA/RNA check
+    RNA = DNA = scaffold = False
+    seq = seq.upper()
+
+    if "U" in seq:
+        RNA = True
+    if "T" in seq:
+        DNA = True
+    if "N" in seq:
+        scaffold = True
+
+    if (RNA):
+        if (DNA):
+            raise Exception("Sequence contains both DNA and RNA.")
+
+    A = C = G = T = U = N = 0
     for x in list(seq):
-        if x == "a" or "A":
+        if x.upper() == "A":
             A += 1
-        elif x == "c" or "C":
+        elif x.upper() == "C":
             C += 1
-        elif x == "g" or "G":
+        elif x.upper() == "G":
             G += 1
-        elif x == "t" or "T":
+        elif x.upper() == "T":
             T += 1
-    print(str(A) + ' ' + str(C) + ' ' + str(G) + ' '+ str(T))
+        elif x.upper() == "U":
+            U += 1
+        elif x.upper() == "N":
+            N += 1
+    if (DNA):
+        print("A: " + str(A) + "\n" + "C: " + str(C) + "\n" + "G: " + str(G) + "\n" + "T: " + str(T))
+    if (RNA):
+        print("A: " + str(A) + "\n" + "C: " + str(C) + "\n" + "G: " + str(G) + "\n" + "U: " + str(U))
+    if (scaffold):
+        print("N: " + str(N))
 
 def transcribe(seq):
     """Converts a sequence of bases, provided as a string, from RNA to
@@ -215,6 +238,7 @@ def getGC(fasta, total=False):
     be returned if total=True.
     """
     GC = 0
+    Ncount = 0
     if (total == False): # Default: return dict of strains with GCs
         strains = fastaToDict(fasta) # Convert fasta into dictionary
         strainsGC = {}
@@ -222,7 +246,9 @@ def getGC(fasta, total=False):
             for base in strains[key]: # Workhorse
                 if base.upper() in ("G", "C"):
                     GC += 1
-            GCperc = (GC / len(strains[key])) * 100
+                if base.upper() in ("N"):
+                    Ncount += 1
+            GCperc = (GC / (len(strains[key]) - Ncount)) * 100
             strainsGC[key] = GCperc
         return(strainsGC)
 
