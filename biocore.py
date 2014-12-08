@@ -294,7 +294,7 @@ def calcHamming(A, B):
         return
     print(dH)
 
-def RNAtoPro(seq):
+def translate(seq):
     """Given an RNA sequence, as a string, returns the protein
     sequence.
     """
@@ -507,6 +507,12 @@ def main(args):
         predictMT(args[1])
     if args[0].lower() == "kmers":
         findKmers(args[1], args[2])
+    if args[0].lower() == "consensus":
+        findConsensus(args[1])
+    if args[0].lower() == "translate":
+        translate(args[1])
+    if args[0].lower() == "transcribe":
+        transcribe(arg[1])
     pass
 
 # If being directly executed (ie. not imported)
