@@ -497,11 +497,23 @@ def predictMT(seq):
 #################################################
 
 # Gateway function
-def main():
-    # First sys.argv = subfunction to be called, following arguments are that functions input arguments.
-    # if 'predictMT', call predictMT with arguments etc. etc.
+def main(args):
+    # args[0] = subfunction to be called, args[1:] = input arguments for args[0].
+    # e.g. if 'mt', call predictMT() with arguments
+
+    if args[0].lower() == "stats":
+        getStats(args[1]) # currently fails to pass on optional arguments, find a way of resolving this issue
+    if args[0].lower() == "mt":
+        predictMT(args[1])
+    if args[0].lower() == "kmers":
+        findKmers(args[1], args[2])
     pass
 
 # If being directly executed (ie. not imported)
 if __name__ == "__main__":
-    exit(main(sys.argv[1:])) # Call main() with arguments from the command line
+    if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
+        # Fill this with something useful explaining basic uses of biocore
+        print("Error: No arguments passed to biocore.\nIn future this message will be more descriptive.")
+        sys.exit()
+    else:
+        exit(main(sys.argv[1:])) # Call main() with arguments from the command line
