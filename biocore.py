@@ -52,7 +52,7 @@ def fastaToDict(fasta):
     f.close()
     return(strains)
 
-def getStats(filename, returnLens=False, scaffold=False):
+def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     """Given a fasta, return the top, bottom and mean lengths.
     Can also optionally return the full list of sequence lengths.
     """
@@ -60,6 +60,7 @@ def getStats(filename, returnLens=False, scaffold=False):
     # NB: Replacing with a 'FASTA' class might be the best future solution
 
     contigLengths = [0]
+    threshold = int(givenThreshold) #bp
     x = -1 # This can probably be replaced with something better suited
 
     f = open(filename, "r")
@@ -79,13 +80,40 @@ def getStats(filename, returnLens=False, scaffold=False):
 
     # Calculate N50 (The smallest contig length that at least half the nucleotides belong to)
     contigLengths.sort(reverse=True)
-    tmpTotal = 0
+
+    tmpTotal = tmpTotalThreshold = 0
 
     for index, value in enumerate(contigLengths):
         tmpTotal += int(contigLengths[index])
         if tmpTotal > (sum(contigLengths) / 2):
             N50 = contigLengths[index]
             break
+
+    toremove = []
+    contigThreshold = []
+
+    # Remove below threshold contigs from contigLengths
+    for i in contigLengths:
+        if i <= threshold:
+            toremove.append(i)
+    
+    for i in contigLengths:
+        if i not in toremove:
+            contigThreshold.append(i)
+
+    # This time for the threshold limit only, but only if the threshold removed contigs
+    if len(contigThreshold) != len(contigLengths):
+        for index, value in enumerate(contigThreshold):
+            tmpTotalThreshold += int(contigThreshold[index])
+            if tmpTotalThreshold > (sum(contigThreshold) / 2):
+                N50threshold = contigThreshold[index]
+                break
+    else:
+        N50threshold = N50
+
+    print(len(contigLengths))
+    print(len(contigThreshold))
+    print(toremove)
 
     # Calculate GC
     statsGC = getGC(filename, total=True)
@@ -96,11 +124,13 @@ def getStats(filename, returnLens=False, scaffold=False):
 
     print ("Mean: " + str(totalMean))
     print ("N50: " + str(N50))
+    print("N50 (>" + str(threshold) + "bp): " + str(N50threshold))
     print ("GC: " + str(statsGC) + "%")
     print ("Longest: " + str(max(contigLengths)))
     print ("Shortest: " + str(min(contigLengths)))
     print ("No. Contigs: " + str(len(contigLengths)))
     print ("Total length: " + str(sum(contigLengths)))
+    ## Include statistics with a bottom threshold (e.g. N50 for contigs > 500bp)
     # Could also add mode, median etc.
 
 #########################
@@ -492,17 +522,24 @@ def predictMT(seq):
         mt = 64.9 + 41 * (GC - 16.4)/len(seq)
     return(mt)
 
-#################################################
-# For distinguishing execution/module behaviour #
-#################################################
+####################################################
+# For distinguishing command line/import behaviour #
+####################################################
 
 # Gateway function
 def main(args):
     # args[0] = subfunction to be called, args[1:] = input arguments for args[0].
     # e.g. if 'mt', call predictMT() with arguments
+    if len(args) == 1:
+        print("Warning: No arguments sent to function.")
 
     if args[0].lower() == "stats":
-        getStats(args[1]) # currently fails to pass on optional arguments, find a way of resolving this issue
+        if len(args) == 2:
+            getStats(args[1]) # passing additional arguments needs to be optimised, current solution is terrible
+        if len(args) == 3:
+            getStats(args[1], args[2])
+        if len(args) == 4:
+            getStats(args[1], args[2], args[3])
     if args[0].lower() == "mt":
         predictMT(args[1])
     if args[0].lower() == "kmers":
@@ -513,13 +550,22 @@ def main(args):
         translate(args[1])
     if args[0].lower() == "transcribe":
         transcribe(arg[1])
+    # else:
+    #     print("Operation aborted: Function not recognised.")
+    #     sys.exit()
     pass
 
 # If being directly executed (ie. not imported)
 if __name__ == "__main__":
     if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
         # Fill this with something useful explaining basic uses of biocore
-        print("Error: No arguments passed to biocore.\nIn future this message will be more descriptive.")
+        print("\nUsage: biocore <command> <arguments>\n\nCommands:\n"
+            +"stats\tBasic statistics for fastas\n"
+            +"mt\tRough melting temperature prediction\n"
+            +"kmers\tFind kmers of given length within a fasta\n"
+            +"translate\tTranslate from RNA/DNA to DNA/RNA, auto-detects\n"
+            +"transcribe\tTranscribe an RNA sequence to proteins\n"
+            +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
         exit(main(sys.argv[1:])) # Call main() with arguments from the command line
