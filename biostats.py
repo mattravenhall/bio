@@ -2,31 +2,52 @@
 
 import sys
 import os
+import biocore
+
+######################################
+# Functions with a statistical focus #
+######################################
 
 def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
-    """Given a fasta, return the top, bottom and mean lengths.
+    """Given a fasta or fastq, return the top, bottom and mean lengths.
     Can also optionally return the full list of sequence lengths.
     """
     
-    # Stats is growing big enough to be its own file, ideally with each stat type as its own function
+    # getStats can probably eventually become a gateway to call multiple stats functions
+    # these additional functions could then be called directly with biostats <fasta> calling getStats by default
 
-    contigLengths = [0]
+    # Warning: fastq is not currently supported. Will break at getGC due to reliance on fasta-only ToDict
+    # To solve, getGC needs to accept fastq files
+
+    #Auto-detect file name
+    filetype = biocore.detectType(filename)
+
+    
     threshold = int(givenThreshold) #bp
     x = -1 # This can probably be replaced with something better suited
+    contigLengths = []
 
     f = open(filename, "r")
 
-    # Get list of sequence lengths
-    for line in f:
-        if ">" in line:
-            # Create new entry in contigLengths ()
-            contigLengths.append(0)
-            x += 1
-        else:
-            # Add length of line to value for that contig
-            contigLengths[x] += len(line.rstrip('\n'))
+    # Get list of sequence lengths, different for fasta/fastq
+    if filetype == "fasta":
+        contigLengths.append(0)
+        for line in f:
+            if ">" in line:
+                # Create new entry in contigLengths ()
+                contigLengths.append(0)
+                x += 1
+            else:
+                # Add length of line to value for that contig
+                contigLengths[x] += len(line.rstrip('\n'))
+        contigLengths = contigLengths[:-1] # Removes excess list entry
+    elif filetype == "fastq":
+        for line1 in f:
+            line2 = next(f)
+            line3 = next(f)
+            line4 = next(f)
+            contigLengths.append(len(line2.rstrip('\n')))
 
-    contigLengths = contigLengths[:-1] # Removes excess list entry
     totalMean = sum(contigLengths) / len(contigLengths)
 
     # Calculate N50 (The smallest contig length that at least half the nucleotides belong to)
@@ -44,16 +65,20 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     contigThreshold = []
 
     # Remove below threshold contigs from contigLengths
-    for i in contigLengths:
+    for i in contigLengths: # Find the lengths under the threshold, add to toremove
         if i <= threshold:
             toremove.append(i)
     
-    for i in contigLengths:
+    for i in contigLengths: # Add lengths above the threshold to contigThreshold
         if i not in toremove:
             contigThreshold.append(i)
 
+    N50threshold = 0
+
     # This time for the threshold limit only, but only if the threshold removed contigs
-    if len(contigThreshold) != len(contigLengths):
+    if len(contigThreshold) == 0:
+        N50threshold = "Error: No contigs longer than " + str(threshold) + "bp!"
+    elif len(contigThreshold) != len(contigLengths):
         for index, value in enumerate(contigThreshold):
             tmpTotalThreshold += int(contigThreshold[index])
             if tmpTotalThreshold > (sum(contigThreshold) / 2):
@@ -80,37 +105,41 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     # Consider changing all stats in relation to a threshold
     # Could also add mode, median etc.
 
-def getGC(fasta, total=False):
-    """Given the location of a fasta, returns the GC value for each
-    strain as a dictionary by default. Alternatively, the total GC will
-    be returned if total=True.
+def getGC(filename, total=False):
+    """Given the location of a fasta or fastq, returns the GC value for
+    each strain as a dictionary by default. Alternatively, the total GC 
+    will be returned if total=True.
     """
-    GC = 0
+
+    filetype = biocore.detectType(filename)
+
     Ncount = 0
     if (total == False): # Default: return dict of strains with GCs
-        strains = fastaToDict(fasta) # Convert fasta into dictionary
+        strains = biocore.ToDict(filename) # Convert file into dictionary
         strainsGC = {}
         for key in strains: # Calculate GCs and assign to strains
-            for base in strains[key]: # Workhorse
+            GC = 0
+            for base in strains[key][0]: # Workhorse
                 if base.upper() in ("G", "C"):
                     GC += 1
                 if base.upper() in ("N"):
                     Ncount += 1
-            GCperc = (GC / (len(strains[key]) - Ncount)) * 100
-            strainsGC[key] = GCperc
+            GCperc = (float(GC) / float((len(strains[key][0])) - float(Ncount))) * 100
+            strainsGC[key] = round(GCperc, 2)
         return(strainsGC)
 
     elif (total): # Alternative: return the total GC for all sequences
+        GC = 0
         totalLength = 0
-        f = open(fasta, "r")
-        for line in f: # Iterate over sequences, ignore sequences names
-            if ">" not in line:
-                totalLength += len(line.rstrip('\n'))
-                for base in line:
-                    if base.upper() in ("G", "C"):
-                        GC += 1
+
+        genome = biocore.ToDict(filename)
+        for key in genome:
+            totalLength += len(genome[key][0])
+            for base in genome[key][0]:
+                if base.upper() in ("G", "C"):
+                    GC += 1
+                    
         totalGC = (float(GC) / float(totalLength)) * 100
-        f.close()
         return(round(totalGC, 2))
         
     
@@ -135,6 +164,8 @@ def main(args):
         print("Warning: No arguments sent to function.")
 
     if args[0].lower() == "full":
+        if len(args) == 1:
+            print("\nUsage: biostats full [<threshold:int (default:500)>] [<scaffold:boolean (default:False)>] [<return all lengths:boolean (default:False)>]\n")
         if len(args) == 2:
             getStats(args[1]) # passing additional arguments needs to be optimised, current solution is terrible
         if len(args) == 3:
@@ -142,12 +173,17 @@ def main(args):
         if len(args) == 4:
             getStats(args[1], args[2], args[3])
     if args[0].lower() == "gc":
-    	if len(args) == 2:
-    		getGC(args[1])
-    	if len(args) == 3:
-    		getGC(args[1], args[2])
+        if len(args) == 1:
+            print("\nUsage: biostats gc <filename:str> [<Return total:boolean (default:False)>]\n")
+        if len(args) == 2:
+            getGC(args[1])
+        if len(args) == 3:
+            getGC(args[1], args[2])
     if args[0].lower() == "topgc":
-    	getHighestGC(args[1])
+        if len(args) == 1:
+            print("\nUsage: biostats topgc <fasta>\n")
+        if len(args) == 2:
+            getHighestGC(args[1])
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -155,8 +191,8 @@ def main(args):
 
 # If being directly executed (ie. not imported)
 if __name__ == "__main__":
-    if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
-        # Fill this with something useful explaining basic uses of biocore
+    if len(sys.argv) <= 1: # ie. if no arguments were passed to biostats
+        # Fill this with something useful explaining basic uses of biostats
         print("\nUsage: biostats <command> <arguments>\n\nCommands:\n"
             +"full\tOverview statistics for fastas\n"
             +"GC\tPercentage GC for given contigs or whole fasta\n"

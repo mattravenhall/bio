@@ -7,6 +7,20 @@ import os
 # Utilities of broader application #
 ####################################
 
+# TODO: Build a fastq to fasta converter (base qualities will have to be removed)
+
+def detectType(filename):
+    """Given filename, will attempt to predict and return the filetype.
+    Note that this depends entirely on the name of the file given.
+    In future this may be replaced with a more dynamic approach.
+    """
+    if filename[-2:] == "fa" or filename[-5:] == "fasta":
+        return("fasta")
+    elif filename[-2:] == "fq" or filename[-5:] == "fastq":
+        return("fastq")
+    elif filename[-2:] == "gz":
+        return("gzip")
+
 def namesToFile(fasta, keepStart='N'):
     """Creates a file of names from a given fasta.
     """
@@ -31,26 +45,40 @@ def namesToFile(fasta, keepStart='N'):
         n.write(element)
     n.close()
 
-def fastaToDict(fasta):
-    """Given a fasta as its harddrive location, returns a dictionary
-    where keys are the strain name and values are their associated
-    sequences. Note that dictionaries are unordered and that all
-    bases will be forced to uppercase.
+def ToDict(filename):
+    """Given a fasta or fastq (as indicated), returns a dictionary
+    with the format {"contig_name": ["sequence"]} if a fasta and 
+    {"contig_name": ["sequence", "qualities"]} if a fastq.
+    Note that dictionaries are unordered and that all bases will be
+    forced to uppercase.
     """
-    strains = {}
+
+    dictionary = {}
     seqcatch = ""
-    f = open(fasta, "r")
+    filetype = detectType(filename)
+
+    f = open(filename, "r")
+
+    if filetype.lower() == "fasta":
+        for line in f: #take name from > to /n, seq from /n to >
+            if ">" in line:
+                tmp = line[1:-1]
+                dictionary[tmp] = seqcatch.upper()
+                seqcatch = ""
+            else:
+                seqcatch += line.rstrip()
+            dictionary[tmp] = [seqcatch.upper()]
+    elif filetype.lower() == "fastq":
+        for line1 in f:
+                line2 = next(f)
+                line3 = next(f)
+                line4 = next(f)
+                dictionary[line1.rstrip('\n')] = [line2.upper().rstrip('\n'), line4.rstrip('\n')]
+    else:
+        raise Exception("Incorrect file format supplied, please indicate fasta or fastq.")
     
-    for line in f: #take name from > to /n, seq from /n to >
-        if ">" in line:
-            tmp = line[1:-1]
-            strains[tmp] = seqcatch.upper()
-            seqcatch = ""
-        else:
-            seqcatch += line.rstrip()
-        strains[tmp] = seqcatch.upper()
     f.close()
-    return(strains)
+    return(dictionary)
 
 #########################
 # Biologically Relevant #
@@ -240,14 +268,14 @@ def findMotif(motif, seq, vocal=False):
 
     # Check is seq is a file or a sequence:
     if (os.path.isfile(seq)): # if seq is a file
-        allSeqs = fastaToDict(seq) # convert fasta to dictionary
+        allSeqs = ToDict(seq) # convert fasta to dictionary
         locationsDict = {}
 
         for key in allSeqs: # Iterate over each sequence
             if (vocal):
                 print("Searching " + str(key) + "...")
             # Force seq into uppercase to avoid case issues
-            seq = allSeqs[key].upper()
+            seq = allSeqs[key][0].upper()
 
             locations = []
             mod = 1
@@ -316,7 +344,7 @@ def findConsensus(fasta):
         consensus = ""
 
         #pull sequences into a dictionary {strain: sequence}
-        sequences = fastaToDict(fasta)
+        sequences = ToDict(fasta)
 
         #check sequences are the same length, else abort
         #if check passes, assigns that length to seqLength
@@ -359,19 +387,20 @@ def findKmers(length, reference):
     """Given a kmer length and a genome as a fasta, returns a dictionary
     of kmers and their counts.
     """
-    refDict = fastaToDict(reference)
+    refDict = ToDict(reference)
     candidates = {} # sequence:count
 
     for key in refDict:
-        for i, base in enumerate(refDict[key]): # Focus on the seq for each contig
-            if i > len(refDict[key])-int(length): # Can this be encorporated into the for loop statement?
+        for i, base in enumerate(refDict[key][0]): # Focus on the seq for each contig
+            if i > len(refDict[key][0])-int(length): # Can this be encorporated into the for loop statement?
                 break;
-            window = refDict[key][i:i + int(length)] # Move across sequence with window
+            window = refDict[key][0][i:i + int(length)] # Move across sequence with window
             if window not in candidates:
                 candidates[window] = 1
             elif window in candidates:
                 candidates[window] += 1
-    return candidates
+
+    return(candidates)
 
 def predictMT(seq):
     """Given a sequence as a string, returns a rough prediction of its 
@@ -391,8 +420,7 @@ def predictMT(seq):
         mt = 4 * GC + 2 * AT
     else:
         mt = 64.9 + 41 * (GC - 16.4)/len(seq)
-    return(mt)
-
+    print(mt)
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
