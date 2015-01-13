@@ -46,8 +46,8 @@ def namesToFile(fasta, keepStart='N'):
     n.close()
 
 def ToDict(filename):
-    """Given a fasta or fastq (as indicated), returns a dictionary
-    with the format {"contig_name": ["sequence"]} if a fasta and 
+    """Given a fasta or fastq, returns a dictionary with the format 
+    {"contig_name": ["sequence"]} if a fasta and 
     {"contig_name": ["sequence", "qualities"]} if a fastq.
     Note that dictionaries are unordered and that all bases will be
     forced to uppercase.
@@ -421,6 +421,47 @@ def predictMT(seq):
     else:
         mt = 64.9 + 41 * (GC - 16.4)/len(seq)
     print(mt)
+
+def simCleaveMulti(genomefile, enzyme, csite):
+    genomeS = ToDict(genomefile)
+    for strain in genomeS:
+        print("\nSimulating cleavage of "+strain+" by "+enzyme+"...")
+        simCleave(genomeS[strain][0], enzyme, csite)
+
+def simCleave(genome, enzyme, csite):
+    """Given a restriction enzyme's recognition site (string), the
+    index at which it cleaves (int) and a sequence to cleave (string),
+    returns a list of the fragment lengths and a list of the fragment
+    sequences.
+
+    E.g. for enzyme 'GCCG' with cleavage site 'GC|CG' csite = 2.
+    NB: Non-specific base sites should be indicated with 'N'.
+    """
+
+    sites = []
+    fragLens = []
+    csite = int(csite)
+
+    for i, baseG in enumerate(genome):
+        if (genome[i] == enzyme[0]) or (enzyme[0].upper() == "N"):
+            for j, baseE in enumerate(enzyme):
+                if (i+len(enzyme)) > len(genome): # if the enzyme would go beyond the given sequence
+                    break
+                if (enzyme[j] == genome[i+j]) or (enzyme[j].upper() == "N"):
+                    if (j + 1) == len(enzyme): #ie. if there is a complete match
+                        sites.append(i + csite)
+                else:
+                    break
+    for k in sites[::-1]: #go over the cleavage sites in reverse
+        genome = genome[:k] + '\n' + genome[k:]
+    genome = genome.split('\n')
+
+    for fragment in genome:
+        fragLens.append(len(fragment))
+
+    print(fragLens)
+    print(genome)
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -441,7 +482,11 @@ def main(args):
     if args[0].lower() == "translate":
         translate(args[1])
     if args[0].lower() == "transcribe":
-        transcribe(arg[1])
+        transcribe(args[1])
+    if args[0].lower() == "simcleave":
+        simCleave(args[1], args[2], args[3])
+    if args[0].lower() == "simcleavemulti":
+        simCleaveMulti(args[1], args[2], args[3])
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -456,6 +501,8 @@ if __name__ == "__main__":
             +"kmers\tFind kmers of given length within a fasta\n"
             +"translate\tTranslate from RNA/DNA to DNA/RNA, auto-detects\n"
             +"transcribe\tTranscribe an RNA sequence to proteins\n"
+            +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
+            +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
