@@ -441,13 +441,14 @@ def simCleave(genome, enzyme, csite):
     sites = []
     fragLens = []
     csite = int(csite)
+    enzyme = enzyme.upper()
 
     for i, baseG in enumerate(genome):
-        if (genome[i] == enzyme[0]) or (enzyme[0].upper() == "N"):
+        if (genome[i].upper() == enzyme[0]) or (enzyme[0] == "N"):
             for j, baseE in enumerate(enzyme):
                 if (i+len(enzyme)) > len(genome): # if the enzyme would go beyond the given sequence
                     break
-                if (enzyme[j] == genome[i+j]) or (enzyme[j].upper() == "N"):
+                if (enzyme[j] == genome[i+j].upper()) or (enzyme[j] == "N"):
                     if (j + 1) == len(enzyme): #ie. if there is a complete match
                         sites.append(i + csite)
                 else:
