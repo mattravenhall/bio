@@ -16,9 +16,6 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     # getStats can probably eventually become a gateway to call multiple stats functions
     # these additional functions could then be called directly with biostats <fasta> calling getStats by default
 
-    # Warning: fastq is not currently supported. Will break at getGC due to reliance on fasta-only ToDict
-    # To solve, getGC needs to accept fastq files
-
     #Auto-detect file name
     filetype = biocore.detectType(filename)
 
