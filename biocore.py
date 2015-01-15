@@ -176,7 +176,7 @@ def getComplement(seq):
             newSeq += "C"
         elif x == "T":
             newSeq += "A"
-    print(newSeq)
+    return(newSeq) # Now internal due to use within simPCR
 
 def getHeteroProb(k, m, n):
         """Returns the probability of gaining a dominate positive
@@ -423,6 +423,8 @@ def predictMT(seq):
     print(mt)
 
 def simCleaveMulti(genomefile, enzyme, csite):
+    """The fasta/fastq multi-sequence gateway to simCleave.
+    """
     genomeS = ToDict(genomefile)
     for strain in genomeS:
         print("\nSimulating cleavage of "+strain+" by "+enzyme+"...")
@@ -436,6 +438,7 @@ def simCleave(genome, enzyme, csite):
 
     E.g. for enzyme 'GCCG' with cleavage site 'GC|CG' csite = 2.
     NB: Non-specific base sites should be indicated with 'N'.
+    NB: Both the genome and enzyme sequences should be provided 5'->3'.
     """
 
     sites = []
@@ -460,8 +463,68 @@ def simCleave(genome, enzyme, csite):
     for fragment in genome:
         fragLens.append(len(fragment))
 
-    print(fragLens)
-    print(genome)
+    print(sorted(fragLens, reverse=True))
+    print(sorted(genome, key=len, reverse=True))
+
+def simPCRMulti(genomefile, primer1, primer2):
+    """The fasta/fastq multi-sequence gateway to simPCR.
+    """
+    genomeS = ToDict(genomefile)
+    for strain in genomeS:
+        print("\nSimulating PCR of "+strain+" by "+primer1+" and "+primer2+"...")
+        simPCR(genomeS[strain][0], primer1, primer2)
+
+def simPCR(sequence, primer1, primer2):
+    """Given strings for a base sequence and two primer sequences, 
+    returns the fragment/s that PCR amplification would produce.
+    NB: Both primer sequences should be in the 5' to 3' direction.
+    """
+
+    sequence = sequence.upper()
+
+    primer1 = primer1.upper()
+    comp1 = getComplement(primer2)
+    primer2 = primer2.upper()
+    comp2 = getComplement(primer1)
+
+    frags = []
+    fraglens = []
+
+    for primer, complement in {primer1: comp1, primer2: comp2}.items():
+        csites = []
+        fragstmp = []
+
+        for i, base in enumerate(sequence): # find sites that primer will cleave
+            if (base == primer[0]) or (primer[0].upper() == "N"): # if sequence base match with first base of primer
+                for j, baseP in enumerate(primer):
+                    if i+len(primer) > len(sequence): # prevent overhanging matches
+                        break
+                    if primer[j] == sequence[i+j]:
+                        if (j+1) == len(primer): # if at end of primer
+                            csites.append(i)
+                    else: # if full match not found
+                        break
+        for k in csites: # perform cleavage by primer sites
+            fragstmp.append(sequence[k:]) # fragments produced from step 1
+
+        for fragment in fragstmp: # apply complement primer to cleavage on fragments
+            csites = []
+            for i, base in enumerate(fragment): # find sites that complement primer will cleave
+                if (base == complement[0]) or (complement[0].upper() == "N"): # if fragment base match with first base of primer
+                    for j, baseP in enumerate(complement):
+                        if i+len(complement) > len(fragment): # prevent overhanging matches
+                            break
+                        if complement[j] == fragment[i+j]:
+                            if (j+1) == len(complement): # if at end of complement primer
+                                csites.append(i)
+                        else: # if full match not found
+                            break
+            for l in csites:
+                frags.append(fragment[:l]) # fragments produced from all cleavage events
+    for piece in frags:
+        fraglens.append(len(piece))
+    print(sorted(fraglens, reverse=True))
+    print(sorted(frags, key=len, reverse=True))
 
 ####################################################
 # For distinguishing command line/import behaviour #
@@ -488,6 +551,12 @@ def main(args):
         simCleave(args[1], args[2], args[3])
     if args[0].lower() == "simcleavemulti":
         simCleaveMulti(args[1], args[2], args[3])
+    if args[0].lower() == "simpcr":
+        simPCR(args[1], args[2], args[3])
+    if args[0].lower() == "simpcrmulti":
+        simPCRMulti(args[1], args[2], args[3])
+    if args[0].lower() == "getcomplement":
+        getComplement(args[1])
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -504,6 +573,8 @@ if __name__ == "__main__":
             +"transcribe\tTranscribe an RNA sequence to proteins\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
+            +"simPCR\tPredict PCR fragments of a given sequence and two primers\n"
+            +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
