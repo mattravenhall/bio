@@ -445,6 +445,7 @@ def simCleave(genome, enzyme, csite):
     fragLens = []
     csite = int(csite)
     enzyme = enzyme.upper()
+    enzymeComp = enzyme[::-1]
 
     for i, baseG in enumerate(genome):
         if (genome[i].upper() == enzyme[0]) or (enzyme[0] == "N"):
@@ -454,6 +455,15 @@ def simCleave(genome, enzyme, csite):
                 if (enzyme[j] == genome[i+j].upper()) or (enzyme[j] == "N"):
                     if (j + 1) == len(enzyme): #ie. if there is a complete match
                         sites.append(i + csite)
+                else:
+                    break
+        elif (genome[i].upper() == enzymeComp[0]) or (enzymeComp[0] == "N"):
+            for l, baseC in enumerate(enzymeComp):
+                if (i+len(enzymeComp)) > len(genome):
+                    break
+                if (enzymeComp[l] == genome[i+l].upper()) or enzymeComp[l] == "N":
+                    if (l + 1) == len(enzyme):
+                        sites.append(len(enzymeComp) - csite)
                 else:
                     break
     for k in sites[::-1]: #go over the cleavage sites in reverse
