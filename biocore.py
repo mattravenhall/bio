@@ -458,6 +458,7 @@ def simCleave(genome, enzyme, csite):
                 else:
                     break
         elif (genome[i].upper() == enzymeComp[0]) or (enzymeComp[0] == "N"):
+            # NB: This loop only makes sense in regards to double-strained DNA
             for l, baseC in enumerate(enzymeComp):
                 if (i+len(enzymeComp)) > len(genome):
                     break
