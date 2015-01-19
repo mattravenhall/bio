@@ -163,7 +163,7 @@ def transcribe(seq):
 
 def getComplement(seq):
     """Returns the reverse complement of a given sequence,
-    as a string
+    as a string. DNA-exclusive.
     """
     revSeq = seq[::-1]
     newSeq = ""
@@ -209,19 +209,19 @@ def getHeteroProb(k, m, n):
         prob = (D*DD*pDD)+(D*Dx*pDH)+(D*Dx*pDR)+(H*HH*pHH)+(H*Hx*pDH)+(H*Hx*pHR)+(R*RR*pRR)+(R*Rx*pDR)+(R*Rx*pHR)
         print(prob)        
 
-def calcHamming(A, B):
+def calcHamming(seqA, seqB):
     """Calculate the Hamming distance between two sequences (as strings)
     of equal length.
     """
-    dH = 0
-    if len(A) == len(B):
-        for index, value in enumerate(A):
-            if value != B[index]:
-                dH += 1
-    if len(A) != len(B):
+    distH = 0
+    if len(seqA) == len(seqB):
+        for index, value in enumerate(seqA):
+            if value != seqB[index]:
+                distH += 1
+    elif len(seqA) != len(seqB):
         print("Error: Sequences must be the same length!")
         return
-    print(dH)
+    print(distH)
 
 def translate(seq):
     """Given an RNA sequence, as a string, returns the protein
@@ -383,7 +383,7 @@ def findConsensus(fasta):
                 print(base[count] + ": " + row)
                 count += 1
 
-def findKmers(length, reference):
+def findKmers(reference, length):
     """Given a kmer length and a genome as a fasta, returns a dictionary
     of kmers and their counts.
     """
@@ -549,25 +549,60 @@ def main(args):
         print("Warning: No arguments sent to function.")
 
     if args[0].lower() == "mt":
-        predictMT(args[1])
+        if len(args) >= 2:
+            predictMT(args[1])
+        else:
+            return("Required arguments: <sequence:str>")
     if args[0].lower() == "kmers":
-        findKmers(args[1], args[2])
+        if len(args) >= 2:
+            findKmers(args[1], args[2])
+        else:
+            return("Required arguments: <genome:fasta/q> <length:int>")
     if args[0].lower() == "consensus":
-        findConsensus(args[1])
+        if len(args) >= 2:
+            findConsensus(args[1])
+        else:
+            return("Required arguments: <sequences:fasta/q>")
     if args[0].lower() == "translate":
-        translate(args[1])
+        if len(args) >= 2:
+            translate(args[1])
+        else:
+            return("Required arguments: <rna:str>")
     if args[0].lower() == "transcribe":
-        transcribe(args[1])
+        if len(args) >= 2:
+            transcribe(args[1])
+        else:
+            return("Required arguments: <sequence:str>")
     if args[0].lower() == "simcleave":
-        simCleave(args[1], args[2], args[3])
+        if len(args) >= 2:
+            simCleave(args[1], args[2], args[3])
+        else:
+            return("Required arguments: <sequence:str> <enzyme:str> <cleavage_site:int>")
     if args[0].lower() == "simcleavemulti":
-        simCleaveMulti(args[1], args[2], args[3])
+        if len(args) >= 2:
+            simCleaveMulti(args[1], args[2], args[3])
+        else:
+            return("Required arguments: <sequences:file> <enzyme:str> <cleavage_site:int>")
     if args[0].lower() == "simpcr":
-        simPCR(args[1], args[2], args[3])
+        if len(args) >= 2:
+            simPCR(args[1], args[2], args[3])
+        else:
+            return("Required arguments: <sequence:str> <primer1:str> <primer2:str>")
     if args[0].lower() == "simpcrmulti":
-        simPCRMulti(args[1], args[2], args[3])
+        if len(args) >= 2:
+            simPCRMulti(args[1], args[2], args[3])
+        else:
+            return("Required arguments: <sequences:location> <primer1:str> <primer2:str>")
     if args[0].lower() == "getcomplement":
-        getComplement(args[1])
+        if len(args) >= 2:
+            getComplement(args[1])
+        else:
+            return("Required arguments: <sequence:str>")
+    if args[0].lower() == "calchamming":
+        if len(args) >= 2:
+            calcHamming(args[1], args[2])
+        else:
+            return("Required arguments: <sequence1:str> <sequence2:str>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -578,13 +613,15 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
         # Fill this with something useful explaining basic uses of biocore
         print("\nUsage: biocore <command> <arguments>\n\nCommands:\n"
-            +"mt\tRough melting temperature prediction\n"
-            +"kmers\tFind kmers of given length within a fasta\n"
+            +"mt\t\tRough melting temperature prediction\n"
+            +"kmers\t\tFind kmers of given length within a fasta\n"
             +"translate\tTranslate from RNA/DNA to DNA/RNA, auto-detects\n"
             +"transcribe\tTranscribe an RNA sequence to proteins\n"
+            +"complement\tFind the complement of a DNA sequence\n"
+            +"calchamming\tDetermine the Hamming distance between two sequences\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
-            +"simPCR\tPredict PCR fragments of a given sequence and two primers\n"
+            +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
