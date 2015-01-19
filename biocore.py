@@ -477,61 +477,61 @@ def simCleave(genome, enzyme, csite):
     print(sorted(fragLens, reverse=True))
     print(sorted(genome, key=len, reverse=True))
 
-def simPCRMulti(genomefile, primer1, primer2):
+def simPCRMulti(genomefile, primer1, primer2, passmark=90):
     """The fasta/fastq multi-sequence gateway to simPCR.
     """
     genomeS = ToDict(genomefile)
     for strain in genomeS:
         print("\nSimulating PCR of "+strain+" by "+primer1+" and "+primer2+"...")
-        simPCR(genomeS[strain][0], primer1, primer2)
+        simPCR(genomeS[strain][0], primer1, primer2, passmark)
 
-def simPCR(sequence, primer1, primer2):
+def simPCR(sequence, primer1, primer2, passmark=90):
     """Given strings for a base sequence and two primer sequences, 
     returns the fragment/s that PCR amplification would produce.
     NB: Both primer sequences should be in the 5' to 3' direction.
+    NB: Primer recognition is currently set at >= 80%.
     """
 
     sequence = sequence.upper()
 
-    primer1 = primer1.upper()
-    comp1 = getComplement(primer2)
-    primer2 = primer2.upper()
-    comp2 = getComplement(primer1)
+    primer = primer1.upper()
+    complement = getComplement(primer2.upper())
 
     frags = []
     fraglens = []
 
-    for primer, complement in {primer1: comp1, primer2: comp2}.items():
+    csites = []
+    fragstmp = []
+
+    for i, base in enumerate(sequence): # for each base in sequence
+        count = 0 # reset match counter
+        total = len(primer)
+        for j, baseP in enumerate(primer): # for each base in primerA
+            if i+len(primer) > len(sequence): # prevent overhanging matches
+                break
+            if primer[j] == sequence[i+j]: # if seq base matches primer base
+                count += 1
+            if ((j+1)==len(primer)) & (((count/total)*100)>=passmark):
+                # if at end of primer & match >= 80%
+                csites.append(i) # add cleavage site to list
+    for k in csites: # perform cleavage by primer sites
+        fragstmp.append(sequence[k:]) # fragments produced from step 1
+
+    for fragment in fragstmp: # apply complement primerB to cleavage on fragments
         csites = []
-        fragstmp = []
-
-        for i, base in enumerate(sequence): # find sites that primer will cleave
-            if (base == primer[0]) or (primer[0].upper() == "N"): # if sequence base match with first base of primer
-                for j, baseP in enumerate(primer):
-                    if i+len(primer) > len(sequence): # prevent overhanging matches
-                        break
-                    if primer[j] == sequence[i+j]:
-                        if (j+1) == len(primer): # if at end of primer
-                            csites.append(i)
-                    else: # if full match not found
-                        break
-        for k in csites: # perform cleavage by primer sites
-            fragstmp.append(sequence[k:]) # fragments produced from step 1
-
-        for fragment in fragstmp: # apply complement primer to cleavage on fragments
-            csites = []
-            for i, base in enumerate(fragment): # find sites that complement primer will cleave
-                if (base == complement[0]) or (complement[0].upper() == "N"): # if fragment base match with first base of primer
-                    for j, baseP in enumerate(complement):
-                        if i+len(complement) > len(fragment): # prevent overhanging matches
-                            break
-                        if complement[j] == fragment[i+j]:
-                            if (j+1) == len(complement): # if at end of complement primer
-                                csites.append(i)
-                        else: # if full match not found
-                            break
-            for l in csites:
-                frags.append(fragment[:l]) # fragments produced from all cleavage events
+        for i, base in enumerate(fragment): # for each base in fragment
+            count = 0
+            total = len(complement)
+            for j, baseP in enumerate(complement): # for each base in primerB
+                if i+len(complement) > len(fragment): # prevent overhanging matches
+                    break
+                if complement[j] == fragment[i+j]:
+                    count += 1
+                if ((j+1)==len(complement)) & (((count/total)*100)>=passmark):
+                    # if at end of complement primer & good enough match
+                    csites.append(i+j) # add cleavage site to list
+        for l in csites:
+            frags.append(fragment[:l]) # fragments produced from all cleavage events
     for piece in frags:
         fraglens.append(len(piece))
     print(sorted(fraglens, reverse=True))
@@ -585,12 +585,18 @@ def main(args):
             return("Required arguments: <sequences:file> <enzyme:str> <cleavage_site:int>")
     if args[0].lower() == "simpcr":
         if len(args) >= 2:
-            simPCR(args[1], args[2], args[3])
+            if len(args) == 4:
+                simPCR(args[1], args[2], args[3])
+            elif len(args) == 5:
+                simPCR(args[1], args[2], args[3], args[4])
         else:
             return("Required arguments: <sequence:str> <primer1:str> <primer2:str>")
     if args[0].lower() == "simpcrmulti":
         if len(args) >= 2:
-            simPCRMulti(args[1], args[2], args[3])
+            if len(args) == 4:
+                simPCRMulti(args[1], args[2], args[3])
+            elif len(args) == 5:
+                simPCRMulti(args[1], args[2], args[3], int(args[4]))
         else:
             return("Required arguments: <sequences:location> <primer1:str> <primer2:str>")
     if args[0].lower() == "getcomplement":
