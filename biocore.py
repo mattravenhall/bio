@@ -63,6 +63,8 @@ def ToDict(filename):
         for line in f: #take name from > to /n, seq from /n to >
             if ">" in line:
                 tmp = line[1:-1]
+                if tmp in dictionary.keys:
+                    raise Exception("Warning: Duplicate ToDict() key identified for: "+tmp+" Please change name for this sequence.")
                 dictionary[tmp] = seqcatch.upper()
                 seqcatch = ""
             else:
@@ -70,6 +72,8 @@ def ToDict(filename):
             dictionary[tmp] = [seqcatch.upper()]
     elif filetype.lower() == "fastq":
         for line1 in f:
+                if line1.rstrip('\n') in dictionary.keys:
+                    raise Exception("Warning: Duplicate ToDict() key identified for: "+tmp+" Please change name for this sequence.")
                 line2 = next(f)
                 line3 = next(f)
                 line4 = next(f)
@@ -79,6 +83,36 @@ def ToDict(filename):
     
     f.close()
     return(dictionary)
+
+def ToList(filename):
+    """Given a fasta file, return a list with the format: 
+    [contig1, contig2, ..., contigN]
+    Note that this function will remove contig labels.
+    """
+
+    # TODO: Allow fasta/fastq recognition.
+
+    theList = []
+    seqcatch = ''
+
+    with open(filename, "r") as f:
+        for line in f: #ignore original > line, catch all else
+            if ">" in line:
+                pass
+            else:
+                if 'N' not in line.upper():
+                    seqcatch += line.rstrip()
+                elif 'N' in line.upper():
+                    for base in line.rstrip():
+                        if base.upper() != 'N':
+                            seqcatch += base
+                        elif base.upper() == 'N':
+                            if seqcatch != '':
+                                theList.append(seqcatch)
+                                seqcatch = ''
+                            else:
+                                pass
+    return(theList)
 
 #########################
 # Biologically Relevant #
@@ -159,7 +193,7 @@ def transcribe(seq):
                 newSeq += "U"
             else:
                 newSeq += str(x)
-    print(newSeq)
+    return(newSeq)
 
 def getComplement(seq):
     """Returns the reverse complement of a given sequence,
@@ -250,12 +284,14 @@ def translate(seq):
                  "GGU": "G", "GGC": "G", "GGA": "G", "GGG": "G"}
     while end == False:
         fc = ticker
+        if len(seq[fc:fc+3]) < 3: # Not fully tested, check
+            break
         codon = seq[fc:fc+3]
         protein += RNAcodons[codon]
         ticker += 3
         if fc+3 >= len(seq):
             end = True
-    print(protein)
+    return(protein)
 
 def findMotif(motif, seq, vocal=False): 
     # TODO: Optionally supress print output, perhaps behind a debug=False flag
@@ -537,6 +573,25 @@ def simPCR(sequence, primer1, primer2, passmark=90):
     print(sorted(fraglens, reverse=True))
     print(sorted(frags, key=len, reverse=True))
 
+def scaffoldToContigs(infile, outfile):
+    """Given a scaffolded genome as a fasta, returns a fasta of the 
+    contigs with a given output name.
+    Note that this approach will remove the > identifier.
+    """
+    wholeGenome = ToList(infile)
+
+    # TODO: Allow fasta and fastq distinction?
+    # TODO: Allow input with more than a single > line
+
+    with open(outfile, 'w') as f:
+        count = 0
+        for contig in wholeGenome:
+            #print > line
+            f.write('> MKAN_contig_'+str(count)+'\n')
+            #print section out
+            f.write(contig+'\n')
+            count += 1
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -629,6 +684,7 @@ if __name__ == "__main__":
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
+            +"scaffToContigs\tConvert single scaffold genome to contigs"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
