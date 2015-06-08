@@ -660,10 +660,15 @@ def main(args):
         else:
             return("Required arguments: <sequence:str>")
     if args[0].lower() == "calchamming":
-        if len(args) >= 2:
+        if len(args) >= 3:
             calcHamming(args[1], args[2])
         else:
             return("Required arguments: <sequence1:str> <sequence2:str>")
+    if args[0].lower() == "scaffToContigs":
+        if len(args) >= 3:
+            scaffoldToContigs(args[1], args[2])
+        else:
+            return("Required arguments: <infile:location> <outfile:str>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -684,7 +689,7 @@ if __name__ == "__main__":
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
-            +"scaffToContigs\tConvert single scaffold genome to contigs"
+            +"scaffToContigs\tConvert single scaffold genome to contigs\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
