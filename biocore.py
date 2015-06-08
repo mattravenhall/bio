@@ -163,7 +163,7 @@ def transcribe(seq):
     DNA or DNA to RNA. An automatic check is included to determine if
     the given sequence is DNA or RNA.
     """
-    seq.upper()
+    seq = seq.upper()
     newSeq = ""
 
     #DNA/RNA check
@@ -259,10 +259,15 @@ def calcHamming(seqA, seqB):
 
 def translate(seq):
     """Given an RNA sequence, as a string, returns the protein
-    sequence.
+    sequence. If given a DNA sequence, will attempt conversion
+    to RNA.
     """
-    ##Convert RNA to Protein
-    #Could include a "check type" function to check if DNA/RNA/Protein
+
+    #Detects DNA and converts to RNA
+    if "T" in seq.upper():
+	print("Notice: DNA sequence detected, converting to RNA")
+	seq = transcribe(seq)
+
     protein = ""
     end = False
     ticker = 0
@@ -284,7 +289,7 @@ def translate(seq):
                  "GGU": "G", "GGC": "G", "GGA": "G", "GGG": "G"}
     while end == False:
         fc = ticker
-        if len(seq[fc:fc+3]) < 3: # Not fully tested, check
+        if len(seq[fc:fc+3]) < 3:
             break
         codon = seq[fc:fc+3]
         protein += RNAcodons[codon]
@@ -294,7 +299,6 @@ def translate(seq):
     return(protein)
 
 def findMotif(motif, seq, vocal=False): 
-    # TODO: Optionally supress print output, perhaps behind a debug=False flag
     """When given a motif <string> and a fasta <file location> or 
     sequence <string> returns the locations of that motif as a 
     dictionary if a file is provided or a list if a string was provided.
