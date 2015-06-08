@@ -63,7 +63,7 @@ def ToDict(filename):
         for line in f: #take name from > to /n, seq from /n to >
             if ">" in line:
                 tmp = line[1:-1]
-                if tmp in dictionary.keys:
+                if tmp in dictionary.keys():
                     raise Exception("Warning: Duplicate ToDict() key identified for: "+tmp+" Please change name for this sequence.")
                 dictionary[tmp] = seqcatch.upper()
                 seqcatch = ""
@@ -72,7 +72,7 @@ def ToDict(filename):
             dictionary[tmp] = [seqcatch.upper()]
     elif filetype.lower() == "fastq":
         for line1 in f:
-                if line1.rstrip('\n') in dictionary.keys:
+                if line1.rstrip('\n') in dictionary.keys():
                     raise Exception("Warning: Duplicate ToDict() key identified for: "+tmp+" Please change name for this sequence.")
                 line2 = next(f)
                 line3 = next(f)
