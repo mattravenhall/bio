@@ -9,7 +9,7 @@ import biocore
 ######################################
 
 def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
-    """Given a fasta or fastq, return the top, bottom and mean lengths.
+    """Given a fasta or fastq, returns range of bioinformatic metrics.
     Can also optionally return the full list of sequence lengths.
     """
     
