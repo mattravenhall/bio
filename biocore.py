@@ -265,8 +265,8 @@ def translate(seq):
 
     #Detects DNA and converts to RNA
     if "T" in seq.upper():
-	print("Notice: DNA sequence detected, converting to RNA")
-	seq = transcribe(seq)
+        print("Notice: DNA sequence detected, converting to RNA")
+    seq = transcribe(seq)
 
     protein = ""
     end = False
