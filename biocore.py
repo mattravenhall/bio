@@ -193,14 +193,18 @@ def transcribe(seq):
                 newSeq += "U"
             else:
                 newSeq += str(x)
+
+    if __name__ == "__main__": # for command line execution
+        print(switch[2:]+" Sequence: "+newSeq)
     return(newSeq)
 
-def getComplement(seq):
+def getComplement(seq, silent=False):
     """Returns the reverse complement of a given sequence,
     as a string. DNA-exclusive.
     """
     revSeq = seq[::-1]
     newSeq = ""
+
     for x in list(revSeq):
         if x == "A":
             newSeq += "T"
@@ -210,7 +214,13 @@ def getComplement(seq):
             newSeq += "C"
         elif x == "T":
             newSeq += "A"
-    return(newSeq) # Now internal due to use within simPCR
+        else:
+            if __name__ == "__main__" and not silent: # for command line execution
+                print("Error: Non-DNA strands cannot be complemented.")
+            return('Error: Non-DNA strands cannot be complemented.')
+    if __name__ == "__main__" and not silent: # for command line execution
+        print("Complement: "+newSeq[::-1])
+    return(newSeq[::-1])
 
 def getHeteroProb(k, m, n):
         """Returns the probability of gaining a dominate positive
@@ -296,6 +306,8 @@ def translate(seq):
         ticker += 3
         if fc+3 >= len(seq):
             end = True
+    if __name__ == "__main__": # for command line execution
+        print("Protein Sequence: "+protein)
     return(protein)
 
 def findMotif(motif, seq, vocal=False): 
@@ -535,7 +547,7 @@ def simPCR(sequence, primer1, primer2, passmark=90):
     sequence = sequence.upper()
 
     primer = primer1.upper()
-    complement = getComplement(primer2.upper())
+    complement = getComplement(primer2.upper(),silent=True)[::-1]
 
     frags = []
     fraglens = []
@@ -658,7 +670,7 @@ def main(args):
                 simPCRMulti(args[1], args[2], args[3], int(args[4]))
         else:
             return("Required arguments: <sequences:location> <primer1:str> <primer2:str>")
-    if args[0].lower() == "getcomplement":
+    if args[0].lower() == "complement":
         if len(args) >= 2:
             getComplement(args[1])
         else:
