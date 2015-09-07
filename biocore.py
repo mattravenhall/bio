@@ -198,7 +198,7 @@ def transcribe(seq):
         print(switch[2:]+" Sequence: "+newSeq)
     return(newSeq)
 
-def getComplement(seq, silent=False):
+def getComplement(seq, silent=False): # 'silent' is currently internal use only
     """Returns the reverse complement of a given sequence,
     as a string. DNA-exclusive.
     """
@@ -215,9 +215,7 @@ def getComplement(seq, silent=False):
         elif x == "T":
             newSeq += "A"
         else:
-            if __name__ == "__main__" and not silent: # for command line execution
-                print("Error: Non-DNA strands cannot be complemented.")
-            return('Error: Non-DNA strands cannot be complemented.')
+            raise Exception('Error: Non-DNA strands cannot be complemented.')
     if __name__ == "__main__" and not silent: # for command line execution
         print("Complement: "+newSeq[::-1])
     return(newSeq[::-1])
