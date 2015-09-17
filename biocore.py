@@ -696,7 +696,7 @@ if __name__ == "__main__":
             +"mt\t\tRough melting temperature prediction\n"
             +"kmers\t\tFind kmers of given length within a fasta\n"
             +"translate\tTranslate from DNA/RNA to Protein, auto-detects\n"
-            +"transcribe\tTranscribe an RNA/DNA to DNA/RNA, auto-detects\n"
+            +"transcribe\tTranscribe from RNA/DNA to DNA/RNA, auto-detects\n"
             +"complement\tFind the complement of a DNA sequence\n"
             +"calchamming\tDetermine the Hamming distance between two sequences\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
