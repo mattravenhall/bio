@@ -616,7 +616,6 @@ def main(args):
     # e.g. if 'mt', call predictMT() with arguments
     if len(args) == 1:
         print("Warning: No arguments sent to function.")
-
     if args[0].lower() == "mt":
         if len(args) >= 2:
             predictMT(args[1])
@@ -678,11 +677,16 @@ def main(args):
             calcHamming(args[1], args[2])
         else:
             return("Required arguments: <sequence1:str> <sequence2:str>")
-    if args[0].lower() == "scaffToContigs":
+    if args[0].lower() == "scafftocontigs":
         if len(args) >= 3:
             scaffoldToContigs(args[1], args[2])
         else:
-            return("Required arguments: <infile:location> <outfile:str>")
+            return("Required arguments: <infile:file_location> <outfile:str>")
+    if args[0].lower() == "findmotif":
+        if len(args) >= 3:
+            findMotif(args[1], args[2])
+        else:
+            return("Required arguments: <motif:str> <fasta:file_location>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -704,6 +708,7 @@ if __name__ == "__main__":
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
             +"scaffToContigs\tConvert single scaffold genome to contigs\n"
+            +"findMotif\tGiven motif start positions in fasta file\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
