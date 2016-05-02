@@ -308,7 +308,7 @@ def translate(seq):
         print("Protein Sequence: "+protein)
     return(protein)
 
-def findMotif(motif, seq, vocal=False): 
+def findMotif(motif, seq, vocal=False, asPrint=False): 
     """When given a motif <string> and a fasta <file location> or 
     sequence <string> returns the locations of that motif as a 
     dictionary if a file is provided or a list if a string was provided.
@@ -365,7 +365,11 @@ def findMotif(motif, seq, vocal=False):
                     print("Whole motif found, adding location...")
                     locations.append(index+1)
                     mod = 1
-        return(locations) # NB: locations is a dictionary for files and a list for strings
+        if asPrint:
+            print(locations)
+        else:
+            return(locations) # NB: locations is a dictionary for files and a list for strings
+        
     else:
         # If not a file or string, abort with an error.
         # Not that os.path.isfile will probably raise an error before this pops.
@@ -684,7 +688,7 @@ def main(args):
             return("Required arguments: <infile:file_location> <outfile:str>")
     if args[0].lower() == "findmotif":
         if len(args) >= 3:
-            findMotif(args[1], args[2])
+            findMotif(args[1], args[2], asPrint=True)
         else:
             return("Required arguments: <motif:str> <fasta:file_location>")
     # else:
