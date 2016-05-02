@@ -46,8 +46,8 @@ def namesToFile(fasta, keepStart='N'):
     n.close()
 
 def ToDict(filename):
-    """Given a fasta or fastq, returns a dictionary with the format 
-    {"contig_name": ["sequence"]} if a fasta and 
+    """Given a fasta or fastq, returns a dictionary with the format
+    {"contig_name": ["sequence"]} if a fasta and
     {"contig_name": ["sequence", "qualities"]} if a fastq.
     Note that dictionaries are unordered and that all bases will be
     forced to uppercase.
@@ -80,12 +80,12 @@ def ToDict(filename):
                 dictionary[line1.rstrip('\n')] = [line2.upper().rstrip('\n'), line4.rstrip('\n')]
     else:
         raise Exception("Incorrect file format supplied, please indicate fasta or fastq.")
-    
+
     f.close()
     return(dictionary)
 
 def ToList(filename):
-    """Given a fasta file, return a list with the format: 
+    """Given a fasta file, return a list with the format:
     [contig1, contig2, ..., contigN]
     Note that this function will remove contig labels.
     """
@@ -179,7 +179,7 @@ def transcribe(seq):
             print("Invalid sequence, contains both DNA and RNA. " +\
                   "Function aborted.")
             return
-    
+
     #Sequence conversion
     if switch == "toDNA":
         for x in list(seq):
@@ -249,7 +249,7 @@ def getHeteroProb(k, m, n):
 
         # Full calculation
         prob = (D*DD*pDD)+(D*Dx*pDH)+(D*Dx*pDR)+(H*HH*pHH)+(H*Hx*pDH)+(H*Hx*pHR)+(R*RR*pRR)+(R*Rx*pDR)+(R*Rx*pHR)
-        print(prob)        
+        print(prob)
 
 def calcHamming(seqA, seqB):
     """Calculate the Hamming distance between two sequences (as strings)
@@ -308,9 +308,9 @@ def translate(seq):
         print("Protein Sequence: "+protein)
     return(protein)
 
-def findMotif(motif, seq, vocal=False, asPrint=False): 
-    """When given a motif <string> and a fasta <file location> or 
-    sequence <string> returns the locations of that motif as a 
+def findMotif(motif, seq, vocal=False, asPrint=False):
+    """When given a motif <string> and a fasta <file location> or
+    sequence <string> returns the locations of that motif as a
     dictionary if a file is provided or a list if a string was provided.
     """
     # Force motif into uppercase to avoid case issues
@@ -345,7 +345,11 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
                         mod = 1
             if locations != []: # Only add to hits to locations if not empty
                 locationsDict[key] = locations
-        return(locationsDict) # Returns a dictionary of hits according to each strain/contig
+        if asPrint:
+            for keys,values in locationsDict.items():
+                print("Motif found starting at (bp):",keys,values)
+        else:
+            return(locationsDict) # Returns a dictionary of hits according to each strain/contig
     elif (type(seq)) == str: # if seq is a string
         # Force seq into uppercase to avoid case issues
         seq = seq.upper()
@@ -366,17 +370,17 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
                     locations.append(index+1)
                     mod = 1
         if asPrint:
-            print(locations)
+            print("Motif found starting at (bp):",locations)
         else:
             return(locations) # NB: locations is a dictionary for files and a list for strings
-        
+
     else:
         # If not a file or string, abort with an error.
         # Not that os.path.isfile will probably raise an error before this pops.
-        raise TypeError("Inappropriate datatype supplied, findMotif currently only accepts strings and fastas.")    
+        raise TypeError("Inappropriate datatype supplied, findMotif currently only accepts strings and fastas.")
 
 def countRepeats(motifs, ref):
-    """Print the number of times a motif repeats within a larger 
+    """Print the number of times a motif repeats within a larger
     sequence. Will work when given a string or a list of strings.
     """
     if (type(motifs) == str): # convert a single string into a one element list
@@ -384,7 +388,7 @@ def countRepeats(motifs, ref):
     for motif in motifs:
         motifDict = findMotif(motif, ref)
         count = sum(len(i) for i in motifDict.itervalues())
-        print(motif + ": " + str(count))  
+        print(motif + ": " + str(count))
 
 def findConsensus(fasta):
         """Returns the consensus string and profile matrix for a given
@@ -412,7 +416,7 @@ def findConsensus(fasta):
                 return
         else: #set sequence lengths
                 seqLength = max(seqLen)
-                
+
         #create empty matrix
         profile = [[0]*seqLength for i in range(4)]
 
@@ -421,7 +425,7 @@ def findConsensus(fasta):
                 for basePos, baseType in enumerate(value):
                        profile[baseDict[baseType]][basePos] += 1
                        #NB: base position = y, base type = x
-        
+
         for i in range(seqLength):
                 colHolder = []
                 for value, x in enumerate(profile):
@@ -430,7 +434,7 @@ def findConsensus(fasta):
 
         #print consensus string
         print(consensus)
-                
+
         #print profile matrix
         for x in profile:
                 row = ' '.join(map(str, x))
@@ -457,8 +461,8 @@ def findKmers(reference, length):
     return(candidates)
 
 def predictMT(seq):
-    """Given a sequence as a string, returns a rough prediction of its 
-    melting temperature as an int. Note that an empirically determined 
+    """Given a sequence as a string, returns a rough prediction of its
+    melting temperature as an int. Note that an empirically determined
     melting temperature may be significantly different.
     """
     GC = AT = 0
@@ -540,7 +544,7 @@ def simPCRMulti(genomefile, primer1, primer2, passmark=90):
         simPCR(genomeS[strain][0], primer1, primer2, passmark)
 
 def simPCR(sequence, primer1, primer2, passmark=90):
-    """Given strings for a base sequence and two primer sequences, 
+    """Given strings for a base sequence and two primer sequences,
     returns the fragment/s that PCR amplification would produce.
     NB: Both primer sequences should be in the 5' to 3' direction.
     NB: Primer recognition is currently set at >= 80%.
@@ -592,7 +596,7 @@ def simPCR(sequence, primer1, primer2, passmark=90):
     print(sorted(frags, key=len, reverse=True))
 
 def scaffoldToContigs(infile, outfile):
-    """Given a scaffolded genome as a fasta, returns a fasta of the 
+    """Given a scaffolded genome as a fasta, returns a fasta of the
     contigs with a given output name.
     Note that this approach will remove the > identifier.
     """
@@ -688,7 +692,7 @@ def main(args):
             return("Required arguments: <infile:file_location> <outfile:str>")
     if args[0].lower() == "findmotif":
         if len(args) >= 3:
-            findMotif(args[1], args[2], asPrint=True)
+            findMotif(args[1], args[2], vocal=False, asPrint=True)
         else:
             return("Required arguments: <motif:str> <fasta:file_location>")
     # else:
