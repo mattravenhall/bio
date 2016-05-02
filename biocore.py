@@ -716,7 +716,7 @@ if __name__ == "__main__":
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
             +"scaffToContigs\tConvert single scaffold genome to contigs\n"
-            +"findMotif\tGiven motif start positions in fasta file\n"
+            +"findMotif\tGiven a motif, find start positions in fasta file or sequence\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
