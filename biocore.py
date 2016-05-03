@@ -11,6 +11,8 @@ import os
 # Utilities of broader application #
 ####################################
 
+Idict = {'A':'A', 'C':'C', 'G':'G', 'T':'T', 'U':'U', 'R':['A', 'G'], 'Y':['C', 'T', 'U'], 'M':['A', 'C'], 'K':['G', 'T', 'U'], 'S':['C', 'G'], 'W':['A', 'T', 'U'], 'H':['A', 'C', 'T', 'U'], 'B':['C', 'G', 'T', 'U'], 'V':['A', 'C', 'G'], 'D':['A', 'G', 'T', 'U'], 'N':['A', 'C', 'G', 'T', 'U'] }
+
 def detectType(filename):
     """Given filename, will attempt to predict and return the filetype.
     Note that this depends entirely on the name of the file given.
@@ -354,6 +356,12 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
     # Force motif into uppercase to avoid case issues
     motif = motif.upper()
 
+    # CONVERT MOTIF TO List of lists?
+    motifGroups = []
+    for x in motif:
+        motifGroups.append(Idict[x])
+    print(motifGroups)
+
     # Check is seq is a file or a sequence:
     if (os.path.isfile(seq)): # if seq is a file
         allSeqs = ToDict(seq) # convert fasta to dictionary
@@ -368,15 +376,15 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
             locations = []
             mod = 1
             for index, base in enumerate(seq): # Iterate over each base
-                if base == motif[0]:
-                    while mod < len(motif) and (index + mod) < len(seq):
-                        if seq[index+mod] == motif[mod]:
+                if base in motifGroups[0]:
+                    while mod < len(motifGroups) and (index + mod) < len(seq):
+                        if seq[index+mod] in motifGroups[mod]:
                             # Base match found, scan for whole motif
                             mod += 1
                         else:
                             mod = 1 # Vital reset of mod on fail
                             break
-                    if mod >= len(motif):
+                    if mod >= len(motifGroups):
                         if (vocal):
                             print("Whole motif found, adding location...")
                         locations.append(index+1)
@@ -395,15 +403,15 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
         locations = []
         mod = 1
         for index, base in enumerate(seq):
-            if base == motif[0]:
-                while mod < len(motif) and (index + mod) < len(seq):
-                    if seq[index+mod] == motif[mod]:
+            if base in motifGroups[0]:
+                while mod < len(motifGroups) and (index + mod) < len(seq):
+                    if seq[index+mod] in motifGroups[mod]:
                         # Base match found, scan for whole motif
                         mod += 1
                     else:
                         mod = 1 # Vital reset of mod on fail
                         break
-                if mod >= len(motif):
+                if mod >= len(motifGroups):
                     print("Whole motif found, adding location...")
                     locations.append(index+1)
                     mod = 1
