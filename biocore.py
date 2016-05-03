@@ -5,6 +5,7 @@ import os
 
 # TODO: Build a fastq to fasta converter (base qualities will have to be removed)
 # TODO: Update findMotif to support IUPAC ambiguous nucleotides (Y, R, W etc.)
+# TODO: Add ambiguous allele support for translate.
 
 ####################################
 # Utilities of broader application #
@@ -167,22 +168,24 @@ def transcribe(seq):
     seq = seq.upper()
     newSeq = ""
 
-    #DNA/RNA check
+    #DNA/RNA check - this breaks if U or T is not present
     if "U" in seq:
         switch = "toDNA"
         if "T" in seq:
             print("Invalid sequence, contains both DNA and RNA. " +\
                   "Function aborted.")
             return
-    if "T" in seq:
+    elif "T" in seq:
         switch = "toRNA"
         if "U" in seq:
             print("Invalid sequence, contains both DNA and RNA. " +\
                   "Function aborted.")
             return
+    else:
+        switch = "toAlt"
 
     #Sequence conversion
-    if switch == "toDNA":
+    if switch == "toDNA" or "toSeq":
         for x in list(seq):
             if x == "U":
                 newSeq += "T"
@@ -194,6 +197,8 @@ def transcribe(seq):
                 newSeq += "U"
             else:
                 newSeq += str(x)
+    elif switch == "toAlt":
+        newSeq == seq
 
     if __name__ == "__main__": # for command line execution
         print(switch[2:]+" Sequence: "+newSeq)
@@ -207,6 +212,7 @@ def getComplement(seq, silent=False): # 'silent' is currently internal use only
     revSeq = seq[::-1]
     newSeq = ""
 
+    # This can be optimised slightly but functions perfectly
     for x in list(revSeq):
         if x == "A":
             newSeq += "T"
@@ -652,12 +658,12 @@ def main(args):
     # e.g. if 'mt', call predictMT() with arguments
     if len(args) == 1:
         print("Warning: No arguments sent to function.")
-    if args[0].lower() == "mt":
+    if args[0].lower() == "predictmt":
         if len(args) >= 2:
             predictMT(args[1])
         else:
             return("Required arguments: <sequence:str>")
-    if args[0].lower() == "kmers":
+    if args[0].lower() == "findkmers":
         if len(args) >= 2:
             findKmers(args[1], args[2])
         else:
@@ -733,12 +739,12 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
         # Fill this with something useful explaining basic uses of biocore
         print("\nUsage: biocore <command> <arguments>\n\nCommands:\n"
-            +"mt\t\tRough melting temperature prediction\n"
-            +"kmers\t\tFind kmers of given length within a fasta\n"
+            +"predictMT\t\tRough melting temperature prediction\n"
+            +"findkmers\t\tFind kmers of given length within a fasta\n"
             +"translate\tTranslate from DNA/RNA to Protein, auto-detects\n"
             +"transcribe\tTranscribe from RNA/DNA to DNA/RNA, auto-detects\n"
             +"complement\tFind the complement of a DNA sequence\n"
-            +"calchamming\tDetermine the Hamming distance between two sequences\n"
+            +"calcHamming\tDetermine the Hamming distance between two sequences\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
