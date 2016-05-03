@@ -739,8 +739,8 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1: # ie. if no arguments were passed to biocore
         # Fill this with something useful explaining basic uses of biocore
         print("\nUsage: biocore <command> <arguments>\n\nCommands:\n"
-            +"predictMT\t\tRough melting temperature prediction\n"
-            +"findkmers\t\tFind kmers of given length within a fasta\n"
+            +"predictMT\tRough melting temperature prediction\n"
+            +"findkmers\tFind kmers of given length within a fasta\n"
             +"translate\tTranslate from DNA/RNA to Protein, auto-detects\n"
             +"transcribe\tTranscribe from RNA/DNA to DNA/RNA, auto-detects\n"
             +"complement\tFind the complement of a DNA sequence\n"
