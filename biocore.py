@@ -206,7 +206,7 @@ def transcribe(seq, asPrint=False):
     else:
         return(newSeq)
 
-def getComplement(seq, silent=False): # 'silent' is currently internal use only
+def getComplement(seq, silent=False): # 'silent' is internal use only
     """Returns the reverse complement of a given sequence,
     as a string. DNA-exclusive. Supports ambiguous alleles,
     including unknowns (as 'X' or 'N') and gaps (as '-').
@@ -301,7 +301,7 @@ def calcHamming(seqA, seqB):
         return
     print(distH)
 
-def translate(seq):
+def translate(seq, silent=False): # 'silent' is internal use only
     """Given an RNA sequence, as a string, returns the protein
     sequence. If given a DNA sequence, will attempt conversion
     to RNA.
@@ -309,7 +309,8 @@ def translate(seq):
 
     #Detects DNA and converts to RNA
     if "T" in seq.upper():
-        print("Notice: DNA sequence detected, converting to RNA")
+        if not silent:
+            print("Notice: DNA sequence detected, converting to RNA")
     seq = transcribe(seq)
 
     protein = ""
@@ -341,7 +342,8 @@ def translate(seq):
         if fc+3 >= len(seq):
             end = True
     if __name__ == "__main__": # for command line execution
-        print("Protein Sequence: "+protein)
+        if not silent:
+            print("Protein Sequence: "+protein)
     return(protein)
 
 def findMotif(motif, seq, vocal=False, asPrint=False):
@@ -650,6 +652,33 @@ def scaffoldToContigs(infile, outfile):
             f.write(contig+'\n')
             count += 1
 
+def AAchange(snp, gene):
+    """Given a gene sequence and SNP, return the amino acid change.
+    """
+    ## As predictMutation('4-A','GATCATGCATGCAGACTAGCATCGA')
+
+    # Set SNP variables
+    if '-' not in snp:
+        print('Error: SNP must be formatted as <location-allele>.')
+        return
+    snpLoc = int(snp.split('-')[0]) - 1
+    snpAllele = str(snp.split('-')[1])
+
+    # SNP location to AA location
+    AAloc = snpLoc // 3
+
+    # Reference amino acid sequence
+    refAA = translate(gene, silent=True)
+
+    # Mutation sequence
+    newGene = list(gene)
+    newGene[snpLoc] = snpAllele
+    newGene = "".join(newGene)
+
+    newAA = translate(newGene, silent=True)
+
+    print('AA Change: '+refAA[AAloc]+str(AAloc+1)+newAA[AAloc]) # e.g. AA Change: Y412G
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -731,6 +760,11 @@ def main(args):
             findMotif(args[1], args[2], vocal=False, asPrint=True)
         else:
             return("Required arguments: <motif:str> <fasta:file_location>")
+    if args[0].lower() == 'aachange':
+        if len(args) >= 3:
+            AAchange(args[1], args[2])
+        else:
+            return("Required arguments: <snp:location_int-allele_str> <sequence:str>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -753,6 +787,7 @@ if __name__ == "__main__":
             +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
             +"scaffToContigs\tConvert single scaffold genome to contigs\n"
             +"findMotif\tGiven a motif, find start positions in fasta file or sequence\n"
+            +"AAchange\tPredict AA change from SNP and gene sequence\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
