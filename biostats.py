@@ -12,14 +12,14 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     """Given a fasta or fastq, returns range of bioinformatic metrics.
     Can also optionally return the full list of sequence lengths.
     """
-    
+
     # getStats can probably eventually become a gateway to call multiple stats functions
     # these additional functions could then be called directly with biostats <fasta> calling getStats by default
 
     #Auto-detect file name
     filetype = biocore.detectType(filename)
 
-    
+
     threshold = int(givenThreshold) #bp
     x = -1 # This can probably be replaced with something better suited
     contigLengths = []
@@ -65,7 +65,7 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
     for i in contigLengths: # Find the lengths under the threshold, add to toremove
         if i <= threshold:
             toremove.append(i)
-    
+
     for i in contigLengths: # Add lengths above the threshold to contigThreshold
         if i not in toremove:
             contigThreshold.append(i)
@@ -104,7 +104,7 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
 
 def getGC(filename, total=False):
     """Given the location of a fasta or fastq, returns the GC value for
-    each strain as a dictionary by default. Alternatively, the total GC 
+    each strain as a dictionary by default. Alternatively, the total GC
     will be returned if total=True.
     """
 
@@ -135,11 +135,10 @@ def getGC(filename, total=False):
             for base in genome[key][0]:
                 if base.upper() in ("G", "C"):
                     GC += 1
-                    
+
         totalGC = (float(GC) / float(totalLength)) * 100
         return(round(totalGC, 2))
-        
-    
+
 def getHighestGC(fasta):
     """Given a fasta file location, prints the strain with the highest
     GC content and its value.
@@ -169,20 +168,13 @@ def main(args):
             getStats(args[1], args[2])
         if len(args) == 4:
             getStats(args[1], args[2], args[3])
-    if args[0].lower() == "gc":
-        if len(args) == 1:
-            print("\nUsage: biostats gc <filename:str> [<Return total:boolean (default:False)>]\n")
-        if len(args) == 2:
-            getGC(args[1])
-        if len(args) == 3:
-            getGC(args[1], args[2])
     if args[0].lower() == "topgc":
         if len(args) == 1:
             print("\nUsage: biostats topgc <fasta>\n")
         if len(args) == 2:
             getHighestGC(args[1])
-    # else:
-    #     print("Operation aborted: Function not recognised.")
+    else:
+         print("Function not recognised.")
     #     sys.exit()
     pass
 
@@ -192,7 +184,6 @@ if __name__ == "__main__":
         # Fill this with something useful explaining basic uses of biostats
         print("\nUsage: biostats <command> <arguments>\n\nCommands:\n"
             +"full\tOverview statistics for fastas\n"
-            +"GC\tPercentage GC for given contigs or whole fasta\n"
             +"topGC\tReturns the contig/strain with the highest GC\n")
         	# Add N50, range, contigs etc. as separate functions
         sys.exit()
