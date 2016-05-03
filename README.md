@@ -19,6 +19,7 @@ Commands:
   - simPCRMulti: simPCR for multiple sequences provided as a fasta/fastq.
   - scaffToContigs: Convert single scaffold genome to contigs.
   - findMotif: Given a motif, find start positions in fasta file or sequence.
+  - AAchange: Given a SNP and gene sequence, predict amino acid change.
 
 NB: This list is incomplete, further internal functions exist and can be called within a Python intrepreter.
 
