@@ -411,7 +411,8 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
                         mod = 1 # Vital reset of mod on fail
                         break
                 if mod >= len(motifGroups):
-                    print("Whole motif found, adding location...")
+                    if (vocal):
+                        print("Whole motif found, adding location...")
                     locations.append(index+1)
                     mod = 1
         if asPrint:
