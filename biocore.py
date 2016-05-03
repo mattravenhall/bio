@@ -360,7 +360,6 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
     motifGroups = []
     for x in motif:
         motifGroups.append(Idict[x])
-    print(motifGroups)
 
     # Check is seq is a file or a sequence:
     if (os.path.isfile(seq)): # if seq is a file
