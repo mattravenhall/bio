@@ -161,14 +161,14 @@ def main(args):
 
     if args[0].lower() == "full":
         if len(args) == 1:
-            print("\nUsage: biostats full [<threshold:int (default:500)>] [<scaffold:boolean (default:False)>] [<return all lengths:boolean (default:False)>]\n")
+            print("\nUsage: biostats full <threshold:int (default:500)> <scaffold:boolean (default:False)> <return all lengths:boolean (default:False)>\n")
         if len(args) == 2:
             getStats(args[1]) # passing additional arguments needs to be optimised, current solution is terrible
         if len(args) == 3:
             getStats(args[1], args[2])
         if len(args) == 4:
             getStats(args[1], args[2], args[3])
-    if args[0].lower() == "topgc":
+    elif args[0].lower() == "topgc":
         if len(args) == 1:
             print("\nUsage: biostats topgc <fasta>\n")
         if len(args) == 2:
