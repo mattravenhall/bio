@@ -160,7 +160,7 @@ def countNucs(seq):
     if (scaffold):
         print("N: " + str(N))
 
-def transcribe(seq):
+def transcribe(seq, asPrint=False):
     """Converts a sequence of bases, provided as a string, from RNA to
     DNA or DNA to RNA. An automatic check is included to determine if
     the given sequence is DNA or RNA.
@@ -185,7 +185,7 @@ def transcribe(seq):
         switch = "toAlt"
 
     #Sequence conversion
-    if switch == "toDNA" or "toSeq":
+    if switch == "toDNA":
         for x in list(seq):
             if x == "U":
                 newSeq += "T"
@@ -200,9 +200,11 @@ def transcribe(seq):
     elif switch == "toAlt":
         newSeq == seq
 
-    if __name__ == "__main__": # for command line execution
+    #if __name__ == "__main__": # for command line execution
+    if asPrint:
         print(switch[2:]+" Sequence: "+newSeq)
-    return(newSeq)
+    else:
+        return(newSeq)
 
 def getComplement(seq, silent=False): # 'silent' is currently internal use only
     """Returns the reverse complement of a given sequence,
@@ -680,7 +682,7 @@ def main(args):
             return("Required arguments: <rna:str>")
     if args[0].lower() == "transcribe":
         if len(args) >= 2:
-            transcribe(args[1])
+            transcribe(args[1], asPrint=True)
         else:
             return("Required arguments: <sequence:str>")
     if args[0].lower() == "simcleave":
