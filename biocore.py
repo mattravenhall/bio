@@ -3,11 +3,12 @@
 import sys
 import os
 
+# TODO: Build a fastq to fasta converter (base qualities will have to be removed)
+# TODO: Update findMotif to support IUPAC ambiguous nucleotides (Y, R, W etc.)
+
 ####################################
 # Utilities of broader application #
 ####################################
-
-# TODO: Build a fastq to fasta converter (base qualities will have to be removed)
 
 def detectType(filename):
     """Given filename, will attempt to predict and return the filetype.
@@ -200,7 +201,8 @@ def transcribe(seq):
 
 def getComplement(seq, silent=False): # 'silent' is currently internal use only
     """Returns the reverse complement of a given sequence,
-    as a string. DNA-exclusive.
+    as a string. DNA-exclusive. Supports ambiguous alleles,
+    including unknowns (as 'X' or 'N') and gaps (as '-').
     """
     revSeq = seq[::-1]
     newSeq = ""
@@ -214,6 +216,32 @@ def getComplement(seq, silent=False): # 'silent' is currently internal use only
             newSeq += "C"
         elif x == "T":
             newSeq += "A"
+        elif x == "Y":
+            newSeq += "R"
+        elif x == "R":
+            newSeq += "Y"
+        elif x == "W":
+            newSeq += "W"
+        elif x == "S":
+            newSeq += "S"
+        elif x == "K":
+            newSeq += "M"
+        elif x == "M":
+            newSeq += "K"
+        elif x == "D":
+            newSeq += "H"
+        elif x == "V":
+            newSeq += "B"
+        elif x == "H":
+            newSeq += "D"
+        elif x == "B":
+            newSeq += "V"
+        elif x == 'X':
+            newSeq += 'X'
+        elif x == 'N':
+            newSeq += 'N'
+        elif x == '-':
+            newSeq += '-'
         else:
             raise Exception('Error: Non-DNA strands cannot be complemented.')
     if __name__ == "__main__" and not silent: # for command line execution
