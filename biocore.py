@@ -416,7 +416,7 @@ def findMotif(motif, seq, vocal=False, asPrint=False):
                     locations.append(index+1)
                     mod = 1
         if asPrint:
-            print("Motif found starting at (bp):",locations)
+            print(len(locations),"motif(s) found starting at (bp):",locations)
         else:
             return(locations) # NB: locations is a dictionary for files and a list for strings
 
