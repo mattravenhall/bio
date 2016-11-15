@@ -678,7 +678,7 @@ def AAchange(snp, gene):
     # Reference amino acid sequence
     refAA = translate(gene, silent=True)
 
-    # Mutation sequence
+    # Mutate sequence
     newGene = list(gene)
     newGene[snpLoc] = snpAllele
     newGene = "".join(newGene)
