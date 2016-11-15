@@ -118,6 +118,45 @@ def ToList(filename):
                                 pass
     return(theList)
 
+def ReadContigsFile(inFile):
+    """Given a file location containing one contig per line as 'bpA:bpB', return
+    a list of all positions.
+    """
+
+    if not os.path.isfile(inFile):
+        raise Exception('Error: Given file (' + inFile + ') does not exist.')
+        return
+
+    contigs = []
+    f = open(inFile,'r')
+    for line in f.readlines():
+        rangeA = int(line.split(':')[0])
+        rangeB = int(line.split(':')[1])
+
+        if rangeA < rangeB:
+            contigs += [x for x in range(rangeA,rangeB+1)]
+        elif rangeA > rangeB:
+            contigs += [x for x in range(rangeA,rangeB+1,-1)]
+        else:
+            raise Exception('Error: Zero length contig identified.')
+    f.close()
+
+    return(contigs)
+
+def ReadContigsCMD(inString):
+    """Given a string indicating contigs formatted as 'bp1:bp2,bp3:bp4', return
+    a list of all bases in that range.
+    """
+
+    # Convert properly formatted string into a list, apologies for the ugliness..!
+    try:
+        contigs = [list(range(int(x.split(':')[0]),int(x.split(':')[1])+1)) for x in inString.split(',')]
+    except:
+        raise Exception("Error: Contigs supplied in irregular format, please input as 'positionA:positionB,positionC:positionD'.")
+
+    # Export in flattened form
+    return([i for i in contigs for i in i])
+
 #########################
 # Biologically Relevant #
 #########################
@@ -687,6 +726,57 @@ def AAchange(snp, gene):
 
     print('AA Change: '+refAA[AAloc]+str(AAloc+1)+newAA[AAloc]) # e.g. AA Change: Y412G
 
+def PosToAA(GivenPosition):
+    """Given a base index, return two integers referring to the equivalent amino
+    acid number and the position within that amino acid.
+    """
+    Codon = (((GivenPosition)-1) // 3)+1
+    PositionInCodon = (((GivenPosition)-1) % 3)+1
+    return(Codon,PositionInCodon)
+
+def BPtoPos(GivenPosition,Contigs):
+    """Given a genomic position and a list of exon base positions, return an
+    amino acid position as a tuple of two integers (amino acid, base within AA).
+    """
+
+    if os.path.isfile(Contigs):
+        print('Processing contigs as file input.')
+        contigs = ReadContigsFile(Contigs)
+    else:
+        print('Processing contigs as command line input.')
+        contigs = ReadContigsCMD(Contigs)
+
+    if GivenPosition not in contigs: # NB: this catches all non-exonic regions, not just introns
+        return('Position: ' + str(GivenPosition) + ' [Intronic]')
+    else:
+        # Grab base index of given position in contigs
+        GenePosition = [i+1 for i, x in enumerate(contigs) if x == GivenPosition]
+
+        # Check we're not getting duplicate positions
+        if len(GenePosition) > 1:
+            raise Exception('Error: Duplicate position/s found in contigs.')
+
+        AApos = PosToAA(GenePosition[0])
+        return('Position: ' + str(GivenPosition) + ' [' + str(AApos[0]) + ':' + str(AApos[1]) + ']')
+
+def AAtoPos(GivenCodon,Contigs):
+    """Given a codon number, return a list of the three possible positions
+    relative to that gene's contig.
+    """
+
+    GivenCodon = int(GivenCodon)
+
+    if os.path.isfile(Contigs):
+        print('Processing contigs as file input.')
+        contigs = ReadContigsFile(Contigs)
+    else:
+        print('Processing contigs as command line input.')
+        contigs = ReadContigsCMD(Contigs)
+
+    AArange = [contigs[(GivenCodon*3)-3], contigs[(GivenCodon*3)-2], contigs[(GivenCodon*3)-1]]
+
+    return('Codon ' + str(GivenCodon) + ' corresponds to positions ' + str(AArange))
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -773,6 +863,16 @@ def main(args):
             AAchange(args[1], args[2])
         else:
             return("Required arguments: <snp:location_int-allele_str> <sequence:str>")
+    if args[0].lower() == 'bptoaa':
+        if len(args) >= 3:
+            print(BPtoPos(args[1],args[2]))
+        else:
+            return("Required arguments: <position:int> <contigs:file_location str>\nNB: Contigs should be formatted as 'bpA:bpB,bpC:bpD'")
+    if args[0].lower() == 'aatobp':
+        if len(args) >= 3:
+            print(AAtoPos(args[1],args[2]))
+        else:
+            return("Required arguments: <codon_number:int> <contigs:file_location or str>\nNB: Contigs should be formatted as 'bpA:bpB,bpC:bpD'")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -796,6 +896,8 @@ if __name__ == "__main__":
             +"scaffToContigs\tConvert single scaffold genome to contigs\n"
             +"findMotif\tGiven a motif, find start positions in fasta file or sequence\n"
             +"AAchange\tPredict AA change from SNP and gene sequence\n"
+            +"BPtoAA\t\tConvert a genomic position to an amino acid position\n"
+            +"AAtoBP\t\tConvert an amino acid position to genomic positions\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
