@@ -738,6 +738,8 @@ def BPtoPos(GivenPosition,Contigs):
     """Given a genomic position and a list of exon base positions, return an
     amino acid position as a tuple of two integers (amino acid, base within AA).
     """
+    
+    GivenPosition = int(GivenPosition)
 
     if os.path.isfile(Contigs):
         print('Processing contigs as file input.')
