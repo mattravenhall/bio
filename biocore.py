@@ -247,10 +247,11 @@ def transcribe(seq, asPrint=False):
     else:
         return(newSeq)
 
-def getComplement(seq, silent=False): # 'silent' is internal use only
-    """Returns the reverse complement of a given sequence,
-    as a string. DNA-exclusive. Supports ambiguous alleles,
-    including unknowns (as 'X' or 'N') and gaps (as '-').
+def getComplement(seq, silent=False, reverse=False): # 'silent' is internal use only
+    """Returns the complement of a given sequence, as a string.
+    DNA-exclusive. Supports ambiguous alleles, including unknowns
+    (as 'X' or 'N') and gaps (as '-'). Reverse complement is
+    dependent on providing reverse=True.
     """
     # TODO: Enable option to ignore ambiguous alleles, returning an error if present.
     # TODO: Enable multi-contig fasta support.
@@ -312,7 +313,8 @@ def getComplement(seq, silent=False): # 'silent' is internal use only
             newSeq += '-'
         else:
             raise Exception('Error: Non-DNA strands cannot be complemented.')
-    newSeq = newSeq[::-1]
+    if not reverse:
+        newSeq = newSeq[::-1]
 
     try: # Write out to file, if given as a file, consider making this a function.
         if filetype.lower() == "fasta":
@@ -884,6 +886,11 @@ def main(args):
             getComplement(args[1])
         else:
             return("Required arguments: <sequence:str>")
+    if args[0].lower() == "revcomplement":
+        if len(args) >= 2:
+            getComplement(args[1],reverse=True)
+        else:
+            return("Required arguments: <sequence:str>")
     if args[0].lower() == "calchamming":
         if len(args) >= 3:
             calcHamming(args[1], args[2])
@@ -929,6 +936,7 @@ if __name__ == "__main__":
             +"translate\tTranslate from DNA/RNA to Protein, auto-detects\n"
             +"transcribe\tTranscribe from RNA/DNA to DNA/RNA, auto-detects\n"
             +"complement\tFind the complement of a DNA sequence\n"
+            +"revcomplement\tFind the reverse complement of a DNA sequence\n"
             +"calcHamming\tDetermine the Hamming distance between two sequences\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
             +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
