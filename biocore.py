@@ -83,7 +83,7 @@ def ToDict(filename):
                 line4 = next(f)
                 dictionary[line1.rstrip('\n')] = [line2.upper().rstrip('\n'), line4.rstrip('\n')]
     else:
-        raise Exception("Incorrect file format supplied, please indicate fasta or fastq.")
+        raise Exception("Incorrect file format supplied, please supply a fasta or fastq.")
 
     f.close()
     return(dictionary)
@@ -252,11 +252,30 @@ def getComplement(seq, silent=False): # 'silent' is internal use only
     as a string. DNA-exclusive. Supports ambiguous alleles,
     including unknowns (as 'X' or 'N') and gaps (as '-').
     """
-    revSeq = seq[::-1]
+    # TODO: Enable option to ignore ambiguous alleles, returning an error if present.
+    # TODO: Enable multi-contig fasta support.
+    # TODO: Enable fastq support.
+
+    # Check if seq was provided as a file, if so get the seq from that file.
+    if os.path.isfile(seq):
+        if (silent == False):
+            print("File input detected, reading into memory.")
+        fileSeq = ToDict(seq)
+        filetype = detectType(seq)
+
+        if filetype.lower() == "fasta": # {"contig_name": ["sequence"]}
+            if (len(fileSeq.values()) == 1):
+                for i in fileSeq.values():
+                    seq = ''.join(i)
+            else:
+                raise Exception("Multi-contig fastas currently not supported for complement.")
+        if filetype.lower() == "fastq":
+            raise Exception("fastq currently not supported for complement, please convert to fasta.")
+
+    revSeq = seq[::-1].upper()
     newSeq = ""
 
-    # This can be optimised slightly but functions perfectly
-    for x in list(revSeq):
+    for x in list(revSeq): # Loop this when implementing multi-contigs
         if x == "A":
             newSeq += "T"
         elif x == "C":
@@ -293,9 +312,29 @@ def getComplement(seq, silent=False): # 'silent' is internal use only
             newSeq += '-'
         else:
             raise Exception('Error: Non-DNA strands cannot be complemented.')
+    newSeq = newSeq[::-1]
+
+    try: # Write out to file, if given as a file, consider making this a function.
+        if filetype.lower() == "fasta":
+            if (silent == False):
+                print('Writing output to complemented.fa')
+            outFile = open('complemented.fa','w')
+            outFile.write('>'+''.join(list(fileSeq.keys()))+'\n') # There should only be one of these
+            for line in [newSeq[i * 80:i * 80+80] for i,blah in enumerate(newSeq[::80])]:
+                outFile.write('%s\n' % line)
+            outFile.close()
+            if (silent == False):
+                print('Output written.')
+            return
+        elif filetype.lower() == "fastq":
+            pass # To be added later
+            return
+    except NameError:
+        pass # Handles non-file input of seq
+
     if __name__ == "__main__" and not silent: # for command line execution
-        print("Complement: "+newSeq[::-1])
-    return(newSeq[::-1])
+        print("Complement: "+newSeq)
+    return(newSeq)
 
 def getHeteroProb(k, m, n):
         """Returns the probability of gaining a dominate positive
@@ -738,7 +777,7 @@ def BPtoPos(GivenPosition,Contigs):
     """Given a genomic position and a list of exon base positions, return an
     amino acid position as a tuple of two integers (amino acid, base within AA).
     """
-    
+
     GivenPosition = int(GivenPosition)
 
     if os.path.isfile(Contigs):
