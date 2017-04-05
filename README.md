@@ -1,5 +1,5 @@
 ### General Bioinformatics Module
-This is a general bioinformatics Python module in progress. Whilst all core functions should work as intended, they are not neccessarily optimised. Redevelopment to resolve this is ongoing but irregular. Biocore currently supports both Python 2 & 3, it is my intention to maintain this compatibility throughout development (though Python 3 is preferred).
+This is a general bioinformatics Python module in progress. Whilst all core functions should work as intended, they are not neccessarily optimised. Redevelopment to resolve this is ongoing but irregular. Whilst bio generally supports both Python 2 & 3, Python 3 should be used to ensure compatibility.
 
 #### biocore.py
 Completed miscellaneous functions, most non-specialised functions should be found here.
@@ -27,7 +27,7 @@ Commands:
 NB: This list is incomplete, further internal functions exist and can be called within a Python intrepreter.
 
 #### biostats.py
-Functions of statistical importance, this script is primarily intended to return overview statistics for newly assembled genomes but will later be adapted for more general evaluation.
+Functions of statistical importance, this script is primarily intended to return overview statistics for newly assembled genomes but may later be adapted for more general evaluation.
 
 Usage: biostats [command] [arguments]
 
@@ -36,7 +36,7 @@ Commands:
   - topGC: Returns the contig/strain with the highest GC.
 
 ### Additional .py files
-Any functions additional to those listed above should be considered as being under active development, they may therefore produce unexpected/unintended results. Use with additional caution.
+Any functions additional to those listed above should be considered as under active development, they may therefore produce unexpected/unintended results. Use with additional caution.
 
 #### Acknowledgements
 Thanks to Álvaro Abella Bascarán for style corrections.
