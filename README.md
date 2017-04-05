@@ -39,4 +39,4 @@ Commands:
 Any functions additional to those listed above should be considered as being under active development, they may therefore produce unexpected/unintended results. Use with additional caution.
 
 #### Acknowledgements
-Thanks to Álvaro Abella Bascarán for his proposed style changes.
+Thanks to Álvaro Abella Bascarán for style corrections.
