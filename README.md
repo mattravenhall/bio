@@ -15,9 +15,9 @@ Commands:
   - complement: Find the complement of a DNA sequence.
   - calcHamming: Determine the Hamming distance between two sequences.
   - simCleave: Simulate cleavage of a sequence by a given enzyme.
-  - simCleaveMulti: simCleave for multiple sequences provided as a fasta/fastq.
+  - simCleaveMulti: simCleave for multiple sequences provided as a fasta/q.
   - simPCR: Predict PCR fragments of a given sequence and two primers.
-  - simPCRMulti: simPCR for multiple sequences provided as a fasta/fastq.
+  - simPCRMulti: simPCR for multiple sequences provided as a fasta/q.
   - scaffToContigs: Convert single scaffold genome to contigs.
   - findMotif: Given a motif, find start positions in fasta file or sequence.
   - AAchange: Given a SNP and gene sequence, predict amino acid change.

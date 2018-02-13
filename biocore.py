@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
 
 # TODO: Build a fastq to fasta converter (base qualities will have to be removed)
 # TODO: Update findMotif to support IUPAC ambiguous nucleotides (Y, R, W etc.)
@@ -949,16 +949,16 @@ if __name__ == "__main__":
             +"revcomplement\tFind the reverse complement of a DNA sequence\n"
             +"calcHamming\tDetermine the Hamming distance between two sequences\n"
             +"simCleave\tSimulate cleavage of a sequence by a given enzyme\n"
-            +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/fastq\n"
+            +"simCleaveMulti\tsimCleave for multiple sequences provided as a fasta/q\n"
             +"simPCR\t\tPredict PCR fragments of a given sequence and two primers\n"
-            +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/fastq\n"
+            +"simPCRMulti\tsimPCR for multiple sequences provided as a fasta/q\n"
             +"scaffToContigs\tConvert single scaffold genome to contigs\n"
             +"findMotif\tGiven a motif, find start positions in fasta file or sequence\n"
             +"AAchange\tPredict AA change from SNP and gene sequence\n"
             +"BPtoAA\t\tConvert a genomic position to an amino acid position\n"
             +"AAtoBP\t\tConvert an amino acid position to genomic positions\n"
             +"consensus\tFind a consensus sequence for a multi-contig fasta/q\n"
-            +"profile\t\tProduce a profile matrix for a given multi-contig fasta\n"
+            +"profile\t\tProduce a profile matrix for a given multi-contig fasta/q\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:
