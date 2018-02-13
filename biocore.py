@@ -517,52 +517,57 @@ def countRepeats(motifs, ref):
         print(motif + ": " + str(count))
 
 def findConsensus(fasta):
-        """Returns the consensus string and profile matrix for a given
+        """Returns the consensus string for a given
         set of strains.
-        Strains must be provided as a fasta. NB: Errors will occur when
-        there is a base conflict.
+        Strains must be provided as a fasta. NB: Base conflicts return 
+        a random max base.
         """
-        base = ['A', 'C', 'G', 'T']
-        baseDict = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
-        count = 0
-        consensus = ""
 
         #pull sequences into a dictionary {strain: sequence}
-        sequences = ToDict(fasta)
+        fastaDict = ToDict(fasta)
 
         #check sequences are the same length, else abort
-        #if check passes, assigns that length to seqLength
-        seqLen = []
-        for value in sequences.values():
-                seqLen.append(len(value))
-        if max(seqLen) != min(seqLen): #exit if sequences different lengths
-                print("Error: Sequences must be of the same length!")
-                print("Sequences current range from " + str(min(seqLen)) +\
-                      " to " + str(max(seqLen)) + " bases long.")
-                return
-        else: #set sequence lengths
-                seqLength = max(seqLen)
+        seqLens = set([len(seq[0]) for seq in fastaDict.values()])
 
-        #create empty matrix
-        profile = [[0]*seqLength for i in range(4)]
+        if len(seqLens) == 1:
+            seqLen = list(seqLens)[0]
+        else:
+            print("Error: Conflicting sequence lengths '{}'.".format(seqLens))
+            sys.exit()
 
-        #populate matrix
-        for value in sequences.values():
-                for basePos, baseType in enumerate(value):
-                       profile[baseDict[baseType]][basePos] += 1
-                       #NB: base position = y, base type = x
-
-        for i in range(seqLength):
-                colHolder = []
-                for value, x in enumerate(profile):
-                        colHolder.append(profile[value][i])
-                consensus += (base[colHolder.index(max(colHolder))])
+        consensus = ''.join([max([seq[0][i] for seq in fastaDict.values()]) for i in range(seqLen)])
 
         #print consensus string
         print(consensus)
 
+def buildProfileMatrix(fasta):
+        """Return a profile matrix for a given set of strains."""
+
+        #pull sequences into a dictionary {strain: sequence}
+        fastaDict = ToDict(fasta)
+
+        #check sequences are the same length, else abort
+        seqLens = set([len(seq[0]) for seq in fastaDict.values()])
+
+        if len(seqLens) == 1:
+            seqLen = list(seqLens)[0]
+        else:
+            print("Error: Conflicting sequence lengths '{}'.".format(seqLens))
+            sys.exit()
+
+        base = ['A', 'C', 'G', 'T']
+        baseDict = {'A': 0, 'C': 1, 'G': 2, 'T': 3}
+        count = 0
+
+        #profile matrix
+        profile = [[0]*seqLen for i in range(4)]
+        for value in fastaDict.values():
+            for basePos, baseType in enumerate(value[0]):
+                profile[baseDict[baseType]][basePos] += 1
+                #NB: base position = y, base type = x
+
         #print profile matrix
-        for x in profile:
+        for i, x in enumerate(profile):
                 row = ' '.join(map(str, x))
                 print(base[count] + ": " + row)
                 count += 1
@@ -845,6 +850,11 @@ def main(args):
             findConsensus(args[1])
         else:
             return("Required arguments: <sequences:fasta/q>")
+    if args[0].lower() == "profile":
+        if len(args) >= 2:
+            buildProfileMatrix(args[1])
+        else:
+            return("Required arguments: <sequences:fasta/q>")
     if args[0].lower() == "translate":
         if len(args) >= 2:
             translate(args[1])
@@ -947,6 +957,8 @@ if __name__ == "__main__":
             +"AAchange\tPredict AA change from SNP and gene sequence\n"
             +"BPtoAA\t\tConvert a genomic position to an amino acid position\n"
             +"AAtoBP\t\tConvert an amino acid position to genomic positions\n"
+            +"consensus\tFind a consensus sequence for a multi-contig fasta/q\n"
+            +"profile\t\tProduce a profile matrix for a given multi-contig fasta\n"
             +"\nNB: This list is incomplete & will be added to later.\n")
         sys.exit()
     else:

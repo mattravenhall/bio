@@ -22,9 +22,11 @@ Commands:
   - findMotif: Given a motif, find start positions in fasta file or sequence.
   - AAchange: Given a SNP and gene sequence, predict amino acid change.
   - BPtoAA: Convert a genomic position to an amino acid position.
-  - AAtoBP: Convert an amino acid position to genomic positions
+  - AAtoBP: Convert an amino acid position to genomic positions.
+  - consensus: Find a consensus sequence for a multi-contig fasta/q.
+  - profile: Produce a profile matrix for a given multi-contig fasta/q.
 
-NB: This list is incomplete, further internal functions exist and can be called within a Python intrepreter.
+NB: This list is likely incomplete, further internal functions may exist and can be called within a Python intrepreter.
 
 #### biostats.py
 Functions of statistical importance, this script is primarily intended to return overview statistics for newly assembled genomes but may later be adapted for more general evaluation.
