@@ -535,7 +535,7 @@ def findConsensus(fasta):
             print("Error: Conflicting sequence lengths '{}'.".format(seqLens))
             sys.exit()
 
-        consensus = ''.join([max([seq[0][i] for seq in fastaDict.values()]) for i in range(seqLen)])
+        consensus = ''.join([max(set([seq[0][i] for seq in fastaDict.values()]), key=[seq[0][i] for seq in fastaDict.values()].count) for i in range(seqLen)])
 
         #print consensus string
         print(consensus)
