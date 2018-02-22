@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import sys
 
 # TODO: Build a fastq to fasta converter (base qualities will have to be removed)
@@ -66,7 +67,7 @@ def ToDict(filename):
     if filetype.lower() == "fasta":
         for line in f: #take name from > to /n, seq from /n to >
             if ">" in line:
-                tmp = line[1:-1]
+                tmp = line[1:-1].lstrip(' ')
                 if tmp in dictionary.keys():
                     raise Exception("Warning: Duplicate ToDict() key identified for: "+tmp+" Please change name for this sequence.")
                 dictionary[tmp] = seqcatch.upper()
@@ -156,6 +157,23 @@ def ReadContigsCMD(inString):
 
     # Export in flattened form
     return([i for i in contigs for i in i])
+
+def writeFasta(titles=[], sequences=[], filename='out.fasta'):
+    '''Given a list of contig names and a list of sequences, write to a fasta'''
+    if isinstance(titles, str): titles = [titles]
+    if isinstance(sequences, str): sequences = [sequences]
+    if len(titles) != len(sequences):
+        titles = ['contig_{}'.format(i) for i in range(len(sequences))]
+
+    # Initiate new file
+    with open(filename, 'w') as fasta:
+        fasta.write('')
+
+    with open(filename, 'a') as fasta:
+        for t, s in zip(titles,sequences):
+            fasta.write('> {}\n'.format(t))
+            s_wNewlines = re.sub("(.{80})","\\1\n", s, 0, re.DOTALL)
+            fasta.write(s_wNewlines+'\n')
 
 #########################
 # Biologically Relevant #
@@ -825,6 +843,20 @@ def AAtoPos(GivenCodon,Contigs):
 
     return('Codon ' + str(GivenCodon) + ' corresponds to positions ' + str(AArange))
 
+def fastaExtract(fasta_location,contigs):
+    '''Given a fasta location and contig name/s, produce a subset of that fasta.'''
+    if not os.path.isfile(fasta_location):
+        raise Exception('Error: Given file (' + fasta_location + ') does not exist.')
+        return
+    contigs = contigs.split(',')
+    fasta = ToDict(fasta_location)
+    for contig in contigs:
+        if contig not in fasta.keys():
+            raise Exception('Error: Given contig name not present in fasta/q.')
+            return
+        outname = contig+'.fasta'
+        writeFasta(titles=contig, sequences=fasta[contig], filename=outname)
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -931,6 +963,11 @@ def main(args):
             print(AAtoPos(args[1],args[2]))
         else:
             return("Required arguments: <codon_number:int> <contigs:file_location or str>\nNB: Contigs should be formatted as 'bpA:bpB,bpC:bpD'")
+    if args[0].lower() == 'fastaextract':
+        if len(args) == 3:
+            fastaExtract(args[1],args[2])
+        else:
+            return("Required arguments: <fasta_location:path> <contigs:comma-separated string>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -959,7 +996,7 @@ if __name__ == "__main__":
             +"AAtoBP\t\tConvert an amino acid position to genomic positions\n"
             +"consensus\tFind a consensus sequence for a multi-contig fasta/q\n"
             +"profile\t\tProduce a profile matrix for a given multi-contig fasta/q\n"
-            +"\nNB: This list is incomplete & will be added to later.\n")
+            +"fastaextract\tWrite out specified contigs from a fasta/q file.\n")
         sys.exit()
     else:
         exit(main(sys.argv[1:])) # Call main() with arguments from the command line
