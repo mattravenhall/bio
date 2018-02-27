@@ -843,7 +843,7 @@ def AAtoPos(GivenCodon,Contigs):
 
     return('Codon ' + str(GivenCodon) + ' corresponds to positions ' + str(AArange))
 
-def fastaExtract(fasta_location,contigs):
+def contigExtract(fasta_location,contigs):
     '''Given a fasta location and contig name/s, produce a subset of that fasta.'''
     if not os.path.isfile(fasta_location):
         raise Exception('Error: Given file (' + fasta_location + ') does not exist.')
@@ -856,6 +856,21 @@ def fastaExtract(fasta_location,contigs):
             return
         outname = contig+'.fasta'
         writeFasta(titles=contig, sequences=fasta[contig], filename=outname)
+
+def seqExtract(fasta_location,location):
+    '''Given a fasta and a sequence location, return that sequence.'''
+    if not os.path.isfile(fasta_location):
+        raise Exception('Error: Given file (' + fasta_location + ') does not exist.')
+        return
+    if location.count('-') is not 2:
+        raise Exception("Error: Location must be passed as 'contig-start-end'.")
+        return
+    contig, bpA, bpB = location.split('-')
+    fasta = ToDict(fasta_location)
+    if contig not in fasta.keys():
+        raise Exception('Error: Given contig name not present in fasta/q.')
+        return
+    print(fasta[contig][0][int(bpA)-1:int(bpB)])
 
 ####################################################
 # For distinguishing command line/import behaviour #
@@ -963,11 +978,16 @@ def main(args):
             print(AAtoPos(args[1],args[2]))
         else:
             return("Required arguments: <codon_number:int> <contigs:file_location or str>\nNB: Contigs should be formatted as 'bpA:bpB,bpC:bpD'")
-    if args[0].lower() == 'fastaextract':
+    if args[0].lower() == 'contigextract':
         if len(args) == 3:
-            fastaExtract(args[1],args[2])
+            contigExtract(args[1],args[2])
         else:
             return("Required arguments: <fasta_location:path> <contigs:comma-separated string>")
+    if args[0].lower() == 'seqextract':
+        if len(args) == 3:
+            seqExtract(args[1],args[2])
+        else:
+            return("Required arguments: <fasta_location:path> <location:contig-bpA-bpB>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -996,7 +1016,8 @@ if __name__ == "__main__":
             +"AAtoBP\t\tConvert an amino acid position to genomic positions\n"
             +"consensus\tFind a consensus sequence for a multi-contig fasta/q\n"
             +"profile\t\tProduce a profile matrix for a given multi-contig fasta/q\n"
-            +"fastaextract\tWrite out specified contigs from a fasta/q file.\n")
+            +"contigextract\tWrite out specified contigs from a fasta/q file.\n"
+            +"seqextract\tWrite out a specific sequence from a fasta/q file.\n")
         sys.exit()
     else:
         exit(main(sys.argv[1:])) # Call main() with arguments from the command line
