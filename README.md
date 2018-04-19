@@ -27,6 +27,7 @@ Commands:
   - profile: Produce a profile matrix for a given multi-contig fasta/q.
   - contigExtract: Write out specified contigs from a fasta/q file.
   - seqExtract: Write out a specific sequence from a fasta/q file.
+  - fasta: Create an example fasta sequence for testing.
 
 NB: This list is likely incomplete, further internal functions may exist and can be called within a Python intrepreter.
 
