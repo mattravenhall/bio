@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import numpy as np
 
 # TODO: Build a fastq to fasta converter (base qualities will have to be removed)
 # TODO: Update findMotif to support IUPAC ambiguous nucleotides (Y, R, W etc.)
@@ -159,9 +160,13 @@ def ReadContigsCMD(inString):
     return([i for i in contigs for i in i])
 
 def writeFasta(titles=[], sequences=[], filename='out.fasta'):
-    '''Given a list of contig names and a list of sequences, write to a fasta'''
+    '''Given a list of contig names and a list of sequences, write to a fasta.'''
+
+    # Check input data isn't totally insane
     if isinstance(titles, str): titles = [titles]
     if isinstance(sequences, str): sequences = [sequences]
+
+    # Create contig names
     if len(titles) != len(sequences):
         titles = ['contig_{}'.format(i) for i in range(len(sequences))]
 
@@ -169,11 +174,46 @@ def writeFasta(titles=[], sequences=[], filename='out.fasta'):
     with open(filename, 'w') as fasta:
         fasta.write('')
 
+    # Write contigs
     with open(filename, 'a') as fasta:
         for t, s in zip(titles,sequences):
             fasta.write('> {}\n'.format(t))
             s_wNewlines = re.sub("(.{80})","\\1\n", s, 0, re.DOTALL)
             fasta.write(s_wNewlines+'\n')
+
+def createFasta(sequenceLens=[300, 200, 100], GCbias=0.5, filename='test.fasta', bases='DNA'):
+    '''Create an example fasta file for testing.'''
+
+    # Select correct base set
+    if bases.upper() == 'DNA':
+        baseset = ['A','C','G','T']
+    elif bases.upper() == 'DNA+':
+        baseset = ['A','C','G','T','R','Y','S','W','K','M','B','D','H','V','N','.']
+    elif bases.upper() == 'RNA':
+        baseset = ['A','C','G','U']
+    elif bases.upper() == 'PROTEIN':
+        baseset = ['A','B','C','D','G','H','J','I','K','L','M','P','Q','R','S','T','V','W','X','Y','Z']
+    else:
+        raise Exception("Error: Unrecognised base type '{}' selected.".format(bases))
+
+    # Determine GC bias if required, currently AT and GC linked.
+    if GCbias == 0.5:
+        acgtProbability = [0.25,0.25,0.25,0.25]
+    elif GCbias < 0 or GCbias > 1:
+        raise Exception("Error: Supplied GCbias '{}' must not be beyond the bounds of 0 to 1.".format(GCbias))
+    else:
+        acgtProbability = [((1-GCbias)/2), (GCbias/2), ((1-GCbias)/2), (GCbias/2)]
+
+    # Assemble pseudo-contigs
+    testTitles = ['Contig{}'.format(i) for i in range(len(sequenceLens))]
+    if bases.upper() == 'DNA':
+        testSeqs = [''.join([np.random.choice(baseset, p=acgtProbability) for j in range(i)]) for i in sequenceLens]
+    else:
+        testSeqs = [''.join([np.random.choice(baseset) for j in range(i)]) for i in sequenceLens]
+
+    # Write to fasta
+    writeFasta(testTitles, testSeqs, filename=filename)
+    print("Test fasta file successfully created.")
 
 #########################
 # Biologically Relevant #
@@ -880,7 +920,7 @@ def seqExtract(fasta_location,location):
 def main(args):
     # args[0] = subfunction to be called, args[1:] = input arguments for args[0].
     # e.g. if 'mt', call predictMT() with arguments
-    if len(args) == 1:
+    if len(args) == 1 and args[0].lower() != 'fasta':
         print("Warning: No arguments sent to function.")
     if args[0].lower() == "predictmt":
         if len(args) >= 2:
@@ -988,6 +1028,14 @@ def main(args):
             seqExtract(args[1],args[2])
         else:
             return("Required arguments: <fasta_location:path> <location:contig-bpA-bpB>")
+    if args[0].lower() == 'fasta':
+        if len(args) == 1:
+            createFasta()
+        elif len(args) == 2:
+            if args[1] in ['DNA','DNA+','RNA','PROTEIN']:
+                createFasta(bases=args[1])
+        else:
+            return("Additional arguments currently not accessible via command line.")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -1017,7 +1065,8 @@ if __name__ == "__main__":
             +"consensus\tFind a consensus sequence for a multi-contig fasta/q\n"
             +"profile\t\tProduce a profile matrix for a given multi-contig fasta/q\n"
             +"contigextract\tWrite out specified contigs from a fasta/q file.\n"
-            +"seqextract\tWrite out a specific sequence from a fasta/q file.\n")
+            +"seqextract\tWrite out a specific sequence from a fasta/q file.\n"
+            +"fasta\t\tCreate a randomised example fasta file.\n")
         sys.exit()
     else:
         exit(main(sys.argv[1:])) # Call main() with arguments from the command line
