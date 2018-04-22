@@ -74,7 +74,7 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
 
     # This time for the threshold limit only, but only if the threshold removed contigs
     if len(contigThreshold) == 0:
-        N50threshold = "Error: No contigs longer than " + str(threshold) + "bp!"
+        N50threshold = "Error: No contigs longer than {0} bp!".format(threshold)
     elif len(contigThreshold) != len(contigLengths):
         for index, value in enumerate(contigThreshold):
             tmpTotalThreshold += int(contigThreshold[index])
@@ -93,7 +93,7 @@ def getStats(filename, givenThreshold=500, scaffold=False, returnLens=False):
 
     print ("Mean: " + str(totalMean))
     print ("N50: " + str(N50))
-    print("N50 (>" + str(threshold) + "bp): " + str(N50threshold))
+    print ("N50 (>{0} bp): {1}".format(threshold, N50threshold))
     print ("GC: " + str(statsGC) + "%")
     print ("Longest: " + str(max(contigLengths)))
     print ("Shortest: " + str(min(contigLengths)))
