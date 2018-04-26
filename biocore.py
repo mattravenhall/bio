@@ -912,6 +912,41 @@ def seqExtract(fasta_location,location):
         return
     print(fasta[contig][0][int(bpA)-1:int(bpB)])
 
+def findLongestPalindrome(seq, threshold=1.0, minWindowSize=4, complement=True):
+    '''Given a sequence, find the longest length palindromes for a given threshold.'''
+    palindromes = []
+    matchPercents = []
+    locations = []
+    lengths = []
+
+    for windowSize in range(len(seq), -1, -1):
+        if len(palindromes) != 0:
+            print('{0} palindromes identified:'.format(len(palindromes)))
+            print('Pos\tLen\tMatch\tSeq')
+            for i in range(len(palindromes)):
+                print('{}\t{}\t{}\t{}'.format(locations[i],lengths[i],matchPercents[i], palindromes[i]))
+            sys.exit()
+        if windowSize < minWindowSize:
+            print('0 palindromes identified.')
+            sys.exit()
+        divider = int(windowSize / 2)
+
+        for n in range(len(seq)-windowSize+1):
+            seqWindow = seq[n:n+windowSize]
+
+            seqA = seqWindow[:divider]
+            seqB = getComplement(seqWindow[divider:], silent=True, reverse=False) if complement else seq[::-1]
+
+            # Get count & percentage matches
+            matches = [True if base == seqB[index] else False for index, base in enumerate(seqA)]
+            perc_matches = sum(matches) / len(matches)
+
+            if perc_matches >= threshold:
+                palindromes.append(seqWindow)
+                matchPercents.append(round(perc_matches,3))
+                locations.append('{0}-{1}'.format(n+1, n+1+windowSize))
+                lengths.append(len(seqWindow))
+
 ####################################################
 # For distinguishing command line/import behaviour #
 ####################################################
@@ -1036,6 +1071,11 @@ def main(args):
                 createFasta(bases=args[1])
         else:
             return("Additional arguments currently not accessible via command line.")
+    if args[0].lower() == 'palindrome':
+        if len(args) == 2:
+            findLongestPalindrome(args[1])
+        else:
+            return("Required arguments: <sequence:string>")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()
@@ -1066,7 +1106,8 @@ if __name__ == "__main__":
             +"profile\t\tProduce a profile matrix for a given multi-contig fasta/q\n"
             +"contigextract\tWrite out specified contigs from a fasta/q file.\n"
             +"seqextract\tWrite out a specific sequence from a fasta/q file.\n"
-            +"fasta\t\tCreate a randomised example fasta file.\n")
+            +"fasta\t\tCreate a randomised example fasta file.\n"
+            +"palindrome\tFind the longest palindrome/s in a given sequence.\n")
         sys.exit()
     else:
         exit(main(sys.argv[1:])) # Call main() with arguments from the command line
