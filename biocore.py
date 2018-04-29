@@ -935,7 +935,7 @@ def findLongestPalindrome(seq, threshold=1.0, minWindowSize=4, complement=True):
             seqWindow = seq[n:n+windowSize]
 
             seqA = seqWindow[:divider]
-            seqB = getComplement(seqWindow[divider:], silent=True, reverse=False) if complement else seq[::-1]
+            seqB = getComplement(seqWindow[divider:], silent=True, reverse=False)[::-1] if complement else seqWindow[divider:][::-1]
 
             # Get count & percentage matches
             matches = [True if base == seqB[index] else False for index, base in enumerate(seqA)]
@@ -1072,8 +1072,19 @@ def main(args):
         else:
             return("Additional arguments currently not accessible via command line.")
     if args[0].lower() == 'palindrome':
+        threshold = 1.0
+        complement = True
         if len(args) == 2:
             findLongestPalindrome(args[1])
+        elif len(args) >= 3:
+            for arg in args[2:]:
+                if arg.lower() == 'true':
+                    complement = True
+                elif arg.lower() == 'false':
+                    complement = False
+                else:
+                    threshold = float(arg)
+            findLongestPalindrome(args[1], threshold=threshold, complement=complement)
         else:
             return("Required arguments: <sequence:string>")
     # else:
