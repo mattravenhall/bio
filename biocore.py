@@ -921,6 +921,7 @@ def findLongestPalindrome(seq, threshold=1.0, minWindowSize=4, complement=True):
 
     for windowSize in range(len(seq), -1, -1):
         if len(palindromes) != 0:
+            print('Sequence length: {0}'.format(len(seq)))
             print('{0} palindromes identified:'.format(len(palindromes)))
             print('Pos\tLen\tMatch\tSeq')
             for i in range(len(palindromes)):
