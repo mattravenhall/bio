@@ -926,10 +926,9 @@ def findLongestPalindrome(seq, threshold=1.0, minWindowSize=4, complement=True):
             print('Pos\tLen\tMatch\tSeq')
             for i in range(len(palindromes)):
                 print('{}\t{}\t{}\t{}'.format(locations[i],lengths[i],matchPercents[i], palindromes[i]))
-            sys.exit()
+            return
         if windowSize < minWindowSize:
-            print('0 palindromes identified.')
-            sys.exit()
+            return('0 palindromes identified.')
         divider = int(windowSize / 2)
 
         for n in range(len(seq)-windowSize+1):
@@ -947,6 +946,30 @@ def findLongestPalindrome(seq, threshold=1.0, minWindowSize=4, complement=True):
                 matchPercents.append(round(perc_matches,3))
                 locations.append('{0}-{1}'.format(n+1, n+1+windowSize))
                 lengths.append(len(seqWindow))
+
+def howPalindromic(seq, complement=True):
+    '''Given a sequence, return how well part A matches part B with or without complement.'''
+    palindromes = []
+    matchPercents = []
+    locations = []
+    lengths = []
+
+    divider = int(len(seq) / 2)
+
+    seqA = seq[:divider]
+    seqB_regular = seq[divider:][::-1]
+    seqB_complement = getComplement(seq[divider:], silent=True, reverse=False)[::-1]
+
+    # Get count & percentage matches
+    matches_regular = [True if base == seqB_regular[index] else False for index, base in enumerate(seqA)]
+    perc_regular = sum(matches_regular) / len(matches_regular)
+    matches_complement = [True if base == seqB_complement[index] else False for index, base in enumerate(seqA)]
+    perc_complement = sum(matches_complement) / len(matches_complement)
+
+    print('Sequence ({0} bp): {1}\n'.format(len(seq),seq))
+    print('Type\t\tPercMatch')
+    print('Complement\t{0:.3f}'.format(perc_complement))
+    print('Non-Complement\t{0:.3f}'.format(perc_regular))
 
 ####################################################
 # For distinguishing command line/import behaviour #
@@ -1078,16 +1101,19 @@ def main(args):
         if len(args) == 2:
             findLongestPalindrome(args[1])
         elif len(args) >= 3:
-            for arg in args[2:]:
-                if arg.lower() == 'true':
-                    complement = True
-                elif arg.lower() == 'false':
-                    complement = False
-                else:
-                    threshold = float(arg)
-            findLongestPalindrome(args[1], threshold=threshold, complement=complement)
+            if 'max' in args[2:]:
+                howPalindromic(args[1])
+            else:
+                for arg in args[2:]:
+                    if arg.lower() == 'true':
+                        complement = True
+                    elif arg.lower() == 'false':
+                        complement = False
+                    else:
+                        threshold = float(arg)
+                findLongestPalindrome(args[1], threshold=threshold, complement=complement)
         else:
-            return("Required arguments: <sequence:string>")
+            return("Required arguments: <sequence:string> (<threshold:float>) (<complement:boolean>)\n- Nb: Pass 'max' to determine palindrome score for whole sequence.")
     # else:
     #     print("Operation aborted: Function not recognised.")
     #     sys.exit()

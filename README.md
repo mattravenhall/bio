@@ -28,6 +28,7 @@ Commands:
   - contigExtract: Write out specified contigs from a fasta/q file.
   - seqExtract: Write out a specific sequence from a fasta/q file.
   - fasta: Create an example fasta sequence for testing.
+  - palindrome: Given a sequence, determine the longest palindrome present.
 
 NB: This list is likely incomplete, further internal functions may exist and can be called within a Python intrepreter.
 
