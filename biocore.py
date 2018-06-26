@@ -736,9 +736,7 @@ def simPCR(sequence, primer1, primer2, passmark=90):
     """Given strings for a base sequence and two primer sequences,
     returns the fragment/s that PCR amplification would produce.
     NB: Both primer sequences should be in the 5' to 3' direction.
-    NB: Primer recognition is currently set at >= 80%.
     """
-
     sequence = sequence.upper()
 
     primer = primer1.upper()
@@ -759,7 +757,7 @@ def simPCR(sequence, primer1, primer2, passmark=90):
             if primer[j] == sequence[i+j]: # if seq base matches primer base
                 count += 1
             if ((j+1)==len(primer)) & (((count/total)*100)>=passmark):
-                # if at end of primer & match >= 80%
+                # if at end of primer & match >= PASSMARK
                 csites.append(i) # add cleavage site to list
     for k in csites: # perform cleavage by primer sites
         fragstmp.append(sequence[k:]) # fragments produced from step 1
@@ -776,7 +774,7 @@ def simPCR(sequence, primer1, primer2, passmark=90):
                     count += 1
                 if ((j+1)==len(complement)) & (((count/total)*100)>=passmark):
                     # if at end of complement primer & good enough match
-                    csites.append(i+j) # add cleavage site to list
+                    csites.append(i+j+1) # add cleavage site to list
         for l in csites:
             frags.append(fragment[:l]) # fragments produced from all cleavage events
     for piece in frags:
