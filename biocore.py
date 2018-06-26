@@ -735,7 +735,7 @@ def simPCRMulti(genomefile, primer1, primer2, passmark=90):
 def simPCR(sequence, primer1, primer2, passmark=90):
     """Given strings for a base sequence and two primer sequences,
     returns the fragment/s that PCR amplification would produce.
-    NB: Both primer sequences should be in the 5' to 3' direction.
+    NB: Primer A should be 5' to 3', whilst Primer B should be a complement 3' to 5'.
     """
     sequence = sequence.upper()
 
